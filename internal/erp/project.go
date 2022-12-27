@@ -18,7 +18,7 @@ func (p *Project) AddTask(taskName string) {
 	p.tasks.Add(taskName)
 }
 
-func parseProjectID(projectName string) string {
+func ParseProjectID(projectName string) string {
 	r, _ := regexp.Compile(".*\\((.*)\\)$")
 	if r != nil {
 		g := r.FindStringSubmatch(projectName)
@@ -26,9 +26,9 @@ func parseProjectID(projectName string) string {
 			return g[1]
 		}
 	}
-	return ""
+	return "N/A"
 }
 
 func NewProject(projectName string) Project {
-	return Project{Name: projectName, ID: parseProjectID(projectName)}
+	return Project{Name: projectName, ID: ParseProjectID(projectName)}
 }
