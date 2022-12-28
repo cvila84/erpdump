@@ -2,17 +2,27 @@ package utils
 
 import "fmt"
 
-type Filter func(data interface{}) bool
+type Filter func(data []interface{}, index ...int) bool
+
+type Selector func(data []interface{}, index ...int) interface{}
 
 type Table struct {
-	data    [][]interface{}
-	rows    [][]interface{}
-	uniques map[int]Vector[string]
+	data            [][]interface{}
+	cells           [][]interface{}
+	uniques         map[int]Vector[string]
+	filters         []Filter
+	rowSelectors    []Selector
+	columnSelectors []Selector
+	valueSelectors  []Selector
 }
 
 func NewTable(data [][]interface{}) *Table {
 	table := &Table{data: data}
-	table.rows = make([][]interface{}, 0)
+	table.cells = make([][]interface{}, 0)
+	table.filters = make([]Filter, 0)
+	table.rowSelectors = make([]Selector, 0)
+	table.columnSelectors = make([]Selector, 0)
+	table.valueSelectors = make([]Selector, 0)
 	return table
 }
 
@@ -20,13 +30,9 @@ func (t *Table) String() string {
 	return ""
 }
 
-func (t *Table) Filter(index int, filter Filter) *Table {
-	return t
-}
-
-func (t *Table) Rows(indexes ...int) *Table {
+func (t *Table) Generate() {
 	for _, item := range t.data {
-		for i := range indexes {
+		for rowSelector := range t.rowSelectors {
 			unique, ok := t.uniques[i]
 			if !ok {
 				unique = Vector[string]{ID: func(element string) string { return element }}
@@ -35,18 +41,24 @@ func (t *Table) Rows(indexes ...int) *Table {
 			unique.Add(fmt.Sprint(item[i]))
 		}
 	}
-	for i := range indexes {
-		for _, item := range t.data {
+}
 
-		}
-	}
+func (t *Table) Filter(filters ...Filter) *Table {
+	t.filters = filters
 	return t
 }
 
-func (t *Table) Columns() *Table {
+func (t *Table) Rows(selectors ...Selector) *Table {
+	t.rowSelectors = selectors
 	return t
 }
 
-func (t *Table) Values() *Table {
+func (t *Table) Columns(selectors ...Selector) *Table {
+	t.columnSelectors = selectors
+	return t
+}
+
+func (t *Table) Values(selectors ...Selector) *Table {
+	t.valueSelectors = selectors
 	return t
 }
