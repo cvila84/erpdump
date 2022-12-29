@@ -47,13 +47,24 @@ func (e *EmployeeTimes) GetAll() [][]interface{} {
 	var result [][]interface{}
 	for k1, v1 := range e.times {
 		for k2, v2 := range v1 {
-			record := make([]interface{}, 12)
+			record := make([]interface{}, 16)
 			result = append(result, record)
 			record[0] = e.Name
 			record[1] = e.ManagerName
 			record[2] = k1
 			record[3] = k2
-			record[4] = v2
+			record[4] = v2[0]
+			record[5] = v2[1]
+			record[6] = v2[2]
+			record[7] = v2[3]
+			record[8] = v2[4]
+			record[9] = v2[5]
+			record[10] = v2[6]
+			record[11] = v2[7]
+			record[12] = v2[8]
+			record[13] = v2[9]
+			record[14] = v2[10]
+			record[15] = v2[11]
 		}
 	}
 	return result
