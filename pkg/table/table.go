@@ -21,10 +21,16 @@ type Series[T string | int | float64] struct {
 	compute Compute[T]
 }
 
+type TableHeaders struct {
+	parent   map[string]interface{}
+	elements map[string]interface{}
+}
+
 type Table[T int | float64] struct {
 	data         [][]interface{}
 	cells        map[string]interface{}
 	filters      map[int]Filter
+	pivot        map[string]map[string]interface{}
 	rowSeries    []Series[string]
 	columnSeries []Series[string]
 	valueSeries  []Series[T]
@@ -179,6 +185,15 @@ func (t *Table[T]) Generate() error {
 		}
 	}
 	return nil
+}
+
+func (t *Table[T]) ToCSV() (string, error) {
+	//e := t.cells
+	//for i := 0; i < len(t.rowSeries); i++ {
+	//	for k, v := range e {
+	//	}
+	//}
+	return "", nil
 }
 
 func (t *Table[T]) Filter(index int, filter Filter) *Table[T] {

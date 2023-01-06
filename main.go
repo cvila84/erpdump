@@ -81,20 +81,20 @@ func main() {
 		}
 		return "External"
 	}
-	yearlyHoursSeries := func(elements []float64) float64 {
-		var result float64
-		for _, element := range elements {
-			result += element
-		}
-		return result
+	otaProjectsSeries := func(elements []string) string {
+		// TODO add custom projects
+		otaProjectsList := []string{"R1R29750", "R1R29751", "R0S29752", "R1R29753", "R0R29754", "R1R30027", "R1R30028"}
+
+		return "OTA"
 	}
+	// TODO create inList compute and put it in utils
 	table := table.NewFloatTable(rawData).
 		Filter(2, projectFilter).
 		ComputedRow([]int{0}, otaGroupSeries).
 		Row(0).
 		Column(2).
 		Column(3).
-		ComputedValues([]int{4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15}, yearlyHoursSeries, table.Sum)
+		ComputedValues([]int{4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15}, utils.QuaterlyHours(1), table.Sum)
 	err := table.Generate()
 	if err != nil {
 		panic(err)
