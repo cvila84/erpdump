@@ -2,6 +2,7 @@ package table
 
 import (
 	"fmt"
+	"sort"
 )
 
 type ValueAction int
@@ -15,47 +16,51 @@ type Filter func(elements []interface{}) []interface{}
 
 type Compute[T string | int | float64] func(elements []T) T
 
+type Sorting func(elements []string) []string
+
+var AlphaSorting Sorting = func(elements []string) []string {
+	sort.Strings(elements)
+	return elements
+}
+
 type Series[T string | int | float64] struct {
 	indexes []int
 	action  ValueAction
 	compute Compute[T]
 }
 
-type TableHeaders struct {
-	parent   map[string]interface{}
-	elements map[string]interface{}
-}
-
 type Table[T int | float64] struct {
-	data         [][]interface{}
-	cells        map[string]interface{}
-	filters      map[int]Filter
-	pivot        map[string]map[string]interface{}
-	rowSeries    []Series[string]
-	columnSeries []Series[string]
-	valueSeries  []Series[T]
+	data          [][]interface{}
+	oldcells      map[string]interface{}
+	pivot         map[string]map[string]interface{}
+	rowHeaders    Headers
+	columnHeaders Headers
+	filters       map[int]Filter
+	rowSeries     []Series[string]
+	columnSeries  []Series[string]
+	valueSeries   []Series[T]
 }
 
 func NewIntTable(data [][]interface{}) *Table[int] {
-	table := &Table[int]{}
-	table.data = data
-	table.cells = make(map[string]interface{})
-	table.filters = make(map[int]Filter)
-	table.rowSeries = make([]Series[string], 0)
-	table.columnSeries = make([]Series[string], 0)
-	table.valueSeries = make([]Series[int], 0)
-	return table
+	return &Table[int]{
+		data:         data,
+		oldcells:     make(map[string]interface{}),
+		filters:      make(map[int]Filter),
+		rowSeries:    make([]Series[string], 0),
+		columnSeries: make([]Series[string], 0),
+		valueSeries:  make([]Series[int], 0),
+	}
 }
 
 func NewFloatTable(data [][]interface{}) *Table[float64] {
-	table := &Table[float64]{}
-	table.data = data
-	table.cells = make(map[string]interface{})
-	table.filters = make(map[int]Filter)
-	table.rowSeries = make([]Series[string], 0)
-	table.columnSeries = make([]Series[string], 0)
-	table.valueSeries = make([]Series[float64], 0)
-	return table
+	return &Table[float64]{
+		data:         data,
+		oldcells:     make(map[string]interface{}),
+		filters:      make(map[int]Filter),
+		rowSeries:    make([]Series[string], 0),
+		columnSeries: make([]Series[string], 0),
+		valueSeries:  make([]Series[float64], 0),
+	}
 }
 
 func addElement[T any](elements []T, element interface{}) ([]T, error) {
@@ -65,6 +70,10 @@ func addElement[T any](elements []T, element interface{}) ([]T, error) {
 	}
 	elements = append(elements, str)
 	return elements, nil
+}
+
+func walk(headers *Headers, series []Series[string], record []interface{}) {
+
 }
 
 func getRow(rows *map[string]interface{}, rowSeries []Series[string], record []interface{}) (*map[string]interface{}, error) {
@@ -171,7 +180,7 @@ func updateCell[T int | float64](cell *[]T, valueSeries []Series[T], record []in
 
 func (t *Table[T]) Generate() error {
 	for _, record := range t.data {
-		row, err := getRow(&t.cells, t.rowSeries, record)
+		row, err := getRow(&t.oldcells, t.rowSeries, record)
 		if err != nil {
 			return err
 		}
@@ -188,7 +197,7 @@ func (t *Table[T]) Generate() error {
 }
 
 func (t *Table[T]) ToCSV() (string, error) {
-	//e := t.cells
+	//e := t.oldcells
 	//for i := 0; i < len(t.rowSeries); i++ {
 	//	for k, v := range e {
 	//	}
@@ -201,22 +210,22 @@ func (t *Table[T]) Filter(index int, filter Filter) *Table[T] {
 	return t
 }
 
-func (t *Table[T]) Row(index int) *Table[T] {
+func (t *Table[T]) Row(index int, sorting Sorting) *Table[T] {
 	t.rowSeries = append(t.rowSeries, Series[string]{[]int{index}, Count, nil})
 	return t
 }
 
-func (t *Table[T]) ComputedRow(indexes []int, compute Compute[string]) *Table[T] {
+func (t *Table[T]) ComputedRow(indexes []int, compute Compute[string], sorting Sorting) *Table[T] {
 	t.rowSeries = append(t.rowSeries, Series[string]{indexes, Count, compute})
 	return t
 }
 
-func (t *Table[T]) Column(index int) *Table[T] {
+func (t *Table[T]) Column(index int, sorting Sorting) *Table[T] {
 	t.columnSeries = append(t.columnSeries, Series[string]{[]int{index}, Count, nil})
 	return t
 }
 
-func (t *Table[T]) ComputedColumn(indexes []int, compute Compute[string]) *Table[T] {
+func (t *Table[T]) ComputedColumn(indexes []int, compute Compute[string], sorting Sorting) *Table[T] {
 	t.columnSeries = append(t.columnSeries, Series[string]{indexes, Count, compute})
 	return t
 }
