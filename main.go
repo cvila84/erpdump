@@ -81,12 +81,12 @@ func main() {
 		}
 		return "External"
 	}
-	otaProjectsSeries := func(elements []string) string {
-		// TODO add custom projects
-		otaProjectsList := []string{"R1R29750", "R1R29751", "R0S29752", "R1R29753", "R0R29754", "R1R30027", "R1R30028"}
-
-		return "OTA"
-	}
+	//otaProjectsSeries := func(elements []string) string {
+	//	// TODO add custom projects
+	//	otaProjectsList := []string{"R1R29750", "R1R29751", "R0S29752", "R1R29753", "R0R29754", "R1R30027", "R1R30028"}
+	//
+	//	return "OTA"
+	//}
 	// TODO create inList compute and put it in utils
 	table := table.NewFloatTable(rawData).
 		Filter(2, projectFilter).
