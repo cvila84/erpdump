@@ -144,12 +144,14 @@ func (t *Table[T]) Generate() error {
 		sumColumnLabel := columnLabel
 		for i := 0; i < len(t.columnSeries)+1; i++ {
 			sumRowLabel := rowLabel
-			for j := 0; j < len(t.rowSeries); j++ {
-				sumRowLabel = parentLabel(sumRowLabel)
-				err = t.updateCell(sumRowLabel, sumColumnLabel, t.valueSeries, record)
-				if err != nil {
-					return err
+			for j := 0; j < len(t.rowSeries)+1; j++ {
+				if i != 0 || j != 0 {
+					err = t.updateCell(sumRowLabel, sumColumnLabel, t.valueSeries, record)
+					if err != nil {
+						return err
+					}
 				}
+				sumRowLabel = parentLabel(sumRowLabel)
 			}
 			sumColumnLabel = parentLabel(sumColumnLabel)
 		}
@@ -160,11 +162,19 @@ func (t *Table[T]) Generate() error {
 func (t *Table[T]) ToCSV() string {
 	var sb strings.Builder
 	for _, columnLabel := range t.columnHeaders.labels(true, true) {
-		_, _ = fmt.Fprint(&sb, ";"+columnLabel)
+		if columnLabel == "" {
+			_, _ = fmt.Fprint(&sb, ";Total")
+		} else {
+			_, _ = fmt.Fprint(&sb, ";"+columnLabel)
+		}
 	}
 	_, _ = fmt.Fprintln(&sb)
 	for _, rowLabel := range t.rowHeaders.labels(true, true) {
-		_, _ = fmt.Fprint(&sb, rowLabel+";")
+		if rowLabel == "" {
+			_, _ = fmt.Fprint(&sb, "Total;")
+		} else {
+			_, _ = fmt.Fprint(&sb, rowLabel+";")
+		}
 		columnLabels := t.columnHeaders.labels(true, true)
 		for i, columnLabel := range columnLabels {
 			v, ok := t.pivot[rowLabel][columnLabel]

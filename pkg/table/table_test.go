@@ -26,7 +26,7 @@ func TestTable(t *testing.T) {
 		{"A2", "B1", "C1", "D2", 5},
 		{"A1", "B1", "C2", "D1", 1},
 	}
-	//           D1      D2      S
+	//           D1      D2      Total
 	// A1        10      1       11
 	// A1/B1     8       1       9
 	// A1/B1/C1  4               4
@@ -36,9 +36,15 @@ func TestTable(t *testing.T) {
 	// A2                5       5
 	// A2/B1             5       5
 	// A2/B1/C1          5       5
-	// S         10      6       16
+	// Total     10      6       16
 	table := NewIntTable(rawData).Row(0).Row(1).Row(2).Column(3).Values(4, Sum)
 	err := table.Generate()
+	if err != nil {
+		t.Fatalf("%s", err)
+	}
+	fmt.Println(table.ToCSV())
+	table = NewIntTable(rawData).Row(0).Row(1).Column(2).Column(3).Values(4, Sum)
+	err = table.Generate()
 	if err != nil {
 		t.Fatalf("%s", err)
 	}
