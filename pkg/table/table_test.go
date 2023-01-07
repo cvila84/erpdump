@@ -37,13 +37,23 @@ func TestTable(t *testing.T) {
 	// A2/B1             5       5
 	// A2/B1/C1          5       5
 	// Total     10      6       16
-	table := NewIntTable(rawData).Row(0).Row(1).Row(2).Column(3).Values(4, Sum)
+	table := NewIntTable(rawData).
+		StandardRow(0).
+		StandardRow(1).
+		StandardRow(2).
+		StandardColumn(3).
+		StandardValues(4, Sum)
 	err := table.Generate()
 	if err != nil {
 		t.Fatalf("%s", err)
 	}
 	fmt.Println(table.ToCSV())
-	table = NewIntTable(rawData).Row(0).Row(1).Column(2).Column(3).Values(4, Sum)
+	table = NewIntTable(rawData).
+		StandardRow(0).
+		StandardRow(1).
+		StandardColumn(2).
+		StandardColumn(3).
+		StandardValues(4, Sum)
 	err = table.Generate()
 	if err != nil {
 		t.Fatalf("%s", err)

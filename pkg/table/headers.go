@@ -1,85 +1,67 @@
 package table
 
-import (
-	"sort"
-	"strings"
-)
-
-type Sorting func(elements []string) []string
-
-var AlphaSorting Sorting = func(elements []string) []string {
-	sort.Strings(elements)
-	return elements
+type headers struct {
+	parent      *headers
+	label       string
+	elements    map[string]*headers
+	defaultSort Sort
+	actualSort  Sort
 }
 
-type Headers struct {
-	parent   *Headers
-	label    string
-	elements map[string]*Headers
-	sorting  Sorting
-}
-
-func NewRootHeaders() *Headers {
-	return &Headers{
-		parent:   nil,
-		label:    "",
-		elements: nil,
-		sorting:  nil,
+func newRootHeaders(defaultSort Sort) *headers {
+	return &headers{
+		parent:      nil,
+		label:       "",
+		elements:    nil,
+		defaultSort: defaultSort,
+		actualSort:  defaultSort,
 	}
 }
 
-func newChild(parent *Headers, label string, sorting Sorting) *Headers {
+func newChild(parent *headers, label string) *headers {
 	var childLabel string
 	if len(parent.label) > 0 {
 		childLabel = parent.label + "/" + label
 	} else {
 		childLabel = label
 	}
-	parent.sorting = sorting
-	return &Headers{
-		parent:   parent,
-		label:    childLabel,
-		elements: nil,
-		sorting:  nil,
+	return &headers{
+		parent:      parent,
+		label:       childLabel,
+		elements:    nil,
+		defaultSort: parent.defaultSort,
+		actualSort:  nil,
 	}
 }
 
-func (h *Headers) sortedWalk(label string, sorting Sorting) *Headers {
+func (h *headers) sort(sort Sort) *headers {
+	h.actualSort = sort
+	return h
+}
+
+func (h *headers) walk(label string) *headers {
 	if h.elements == nil {
-		h.elements = make(map[string]*Headers)
+		h.elements = make(map[string]*headers)
 	}
 	re, ok := h.elements[label]
 	if !ok {
-		re = newChild(h, label, sorting)
+		re = newChild(h, label)
 		h.elements[label] = re
 	}
 	return re
 }
 
-func (h *Headers) walk(label string) *Headers {
-	return h.sortedWalk(label, AlphaSorting)
-}
-
-func parentLabel(label string) string {
-	if label == "" {
-		return ""
-	}
-	idx := strings.LastIndex(label, "/")
-	if idx <= 0 {
-		return ""
-	}
-	return label[0:idx]
-}
-
-func (h *Headers) labels(recursive bool, self bool) []string {
+func (h *headers) labels(recursive bool, self bool) []string {
 	labels := make([]string, 0)
 	if h.elements != nil {
 		keys := make([]string, 0, len(h.elements))
 		for k := range h.elements {
 			keys = append(keys, k)
 		}
-		if h.sorting != nil {
-			keys = h.sorting(keys)
+		if h.actualSort != nil {
+			keys = h.actualSort(keys)
+		} else if h.defaultSort != nil {
+			keys = h.defaultSort(keys)
 		}
 		for _, k := range keys {
 			labels = append(labels, h.elements[k].label)

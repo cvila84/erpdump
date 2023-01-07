@@ -1,8 +1,8 @@
 package main
 
 import (
+	"bufio"
 	"encoding/csv"
-	"fmt"
 	"github.com/cvila84/erpdump/internal/erp"
 	"github.com/cvila84/erpdump/pkg/table"
 	"github.com/cvila84/erpdump/pkg/utils"
@@ -62,18 +62,36 @@ func main() {
 	for _, data := range employeesTimes.GetAll() {
 		rawData = append(rawData, data.GetAll()...)
 	}
-	otaPeople := utils.InList([]string{"Cabagno,Anne", "Tessier,Alexandra", "Fioux,Sebastien"}, "OTA", "External")
-	otaProjects := utils.InList([]string{"R1R29750", "R1R29751", "R0S29752", "R1R29753", "R0R29754", "R1R30027", "R1R30028"}, "OTA", "External")
-	table := table.NewFloatTable(rawData).
-		ComputedRow([]int{0}, otaPeople).
-		Row(0).
-		ComputedColumn([]int{2}, otaProjects).
-		Column(2).
-		Column(3).
-		ComputedValues([]int{4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15}, utils.YearlyHours, table.Sum)
-	err := table.Generate()
+	otaPeople := []string{"Cabagno,Anne", "Tessier,Alexandra", "Fioux,Sebastien"}
+	otaProjects := []string{"R1R29750", "R1R29751", "R0S29752", "R1R29753", "R0R29754", "R1R30027", "R1R30028"}
+	otaManagers := []string{"Vila,Christophe"}
+	tcd := table.NewFloatTable(rawData).
+		Filter(1, table.In(otaManagers)).
+		Row([]int{0}, table.Regroup(otaPeople, "OTA", "External"), nil, table.AlphaSort).
+		StandardRow(0).
+		Column([]int{2}, table.Regroup(otaProjects, "OTA", "Other"), nil, table.AlphaSort).
+		StandardColumn(2).
+		StandardColumn(3).
+		Values([]int{4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15}, utils.YearlyHours, table.Sum, nil)
+	err := tcd.Generate()
 	if err != nil {
 		panic(err)
 	}
-	fmt.Println(table.ToCSV())
+	file, err := os.Create("erp2022-tcd.csv")
+	if err != nil {
+		panic(err)
+	}
+	writer := bufio.NewWriter(file)
+	_, err = writer.WriteString(tcd.ToCSV())
+	if err != nil {
+		panic(err)
+	}
+	err = writer.Flush()
+	if err != nil {
+		panic(err)
+	}
+	err = file.Close()
+	if err != nil {
+		panic(err)
+	}
 }
