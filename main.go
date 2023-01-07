@@ -62,42 +62,18 @@ func main() {
 	for _, data := range employeesTimes.GetAll() {
 		rawData = append(rawData, data.GetAll()...)
 	}
-	projectFilter := func(elements []interface{}) []interface{} {
-		var filteredElements []interface{}
-		for _, element := range elements {
-			s, ok := element.(string)
-			if ok && s == "R1R29750" {
-				filteredElements = append(filteredElements, s)
-			}
-		}
-		return filteredElements
-	}
-	otaGroupSeries := func(elements []string) string {
-		otaEmployeeList := []string{"Cabagno,Anne", "Tessier,Alexandra", "Fioux,Sebastien"}
-		for _, employee := range otaEmployeeList {
-			if elements[0] == employee {
-				return "OTA"
-			}
-		}
-		return "External"
-	}
-	//otaProjectsSeries := func(elements []string) string {
-	//	// TODO add custom projects
-	//	otaProjectsList := []string{"R1R29750", "R1R29751", "R0S29752", "R1R29753", "R0R29754", "R1R30027", "R1R30028"}
-	//
-	//	return "OTA"
-	//}
-	// TODO create inList compute and put it in utils
+	otaPeople := utils.InList([]string{"Cabagno,Anne", "Tessier,Alexandra", "Fioux,Sebastien"}, "OTA", "External")
+	otaProjects := utils.InList([]string{"R1R29750", "R1R29751", "R0S29752", "R1R29753", "R0R29754", "R1R30027", "R1R30028"}, "OTA", "External")
 	table := table.NewFloatTable(rawData).
-		Filter(2, projectFilter).
-		ComputedRow([]int{0}, otaGroupSeries).
+		ComputedRow([]int{0}, otaPeople).
 		Row(0).
+		ComputedColumn([]int{2}, otaProjects).
 		Column(2).
 		Column(3).
-		ComputedValues([]int{4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15}, utils.QuaterlyHours(1), table.Sum)
+		ComputedValues([]int{4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15}, utils.YearlyHours, table.Sum)
 	err := table.Generate()
 	if err != nil {
 		panic(err)
 	}
-	fmt.Println(table)
+	fmt.Println(table.ToCSV())
 }
