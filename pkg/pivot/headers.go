@@ -1,4 +1,4 @@
-package table
+package pivot
 
 type headers struct {
 	parent      *headers

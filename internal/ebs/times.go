@@ -1,4 +1,4 @@
-package erp
+package ebs
 
 import (
 	"github.com/cvila84/erpdump/pkg/utils"
@@ -88,7 +88,7 @@ func weeklyHours(record []string) []float64 {
 	return hours
 }
 
-func MonthlyHours(record []string) (int, float64, float64, error) {
+func monthlyHours(record []string) (int, float64, float64, error) {
 	startDay, startMonth, startYear, err := utils.ParseDate(record[6])
 	if err != nil {
 		return 0, 0, 0, err

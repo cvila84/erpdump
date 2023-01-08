@@ -5,26 +5,6 @@ import (
 	"time"
 )
 
-var YearlyHours = func(elements []float64) float64 {
-	var result float64
-	for _, element := range elements {
-		result += element
-	}
-	return result
-}
-
-var QuaterlyHours = func(quarter int) func(elements []float64) float64 {
-	return func(elements []float64) float64 {
-		var result float64
-		for i, element := range elements {
-			if i >= 3*(quarter-1) && i < 3*quarter {
-				result += element
-			}
-		}
-		return result
-	}
-}
-
 func ParseDate(date string) (int, int, int, error) {
 	day, err := strconv.Atoi(date[0:2])
 	if err != nil {

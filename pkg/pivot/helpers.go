@@ -1,4 +1,4 @@
-package table
+package pivot
 
 import (
 	"fmt"
@@ -85,7 +85,7 @@ func walk(headers *headers, series []series[string], record []interface{}) (stri
 		if err != nil {
 			return "", err
 		}
-		h = h.walk(value).sort(serie.sort)
+		h = h.sort(serie.sort).walk(value)
 	}
 	return h.label, nil
 }
