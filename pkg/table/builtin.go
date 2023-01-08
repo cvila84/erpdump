@@ -15,14 +15,30 @@ var ReverseAlphaSort Sort = func(elements []string) []string {
 	return elements
 }
 
-var Regroup = func(list []string, memberLabel string, nonMemberLabel string) Compute[string] {
+var Group1 = func(group1 []string, group1Label string, nowhereLabel string) Compute[string] {
 	return func(elements []string) string {
-		for _, e := range list {
+		for _, e := range group1 {
 			if elements[0] == e {
-				return memberLabel
+				return group1Label
 			}
 		}
-		return nonMemberLabel
+		return nowhereLabel
+	}
+}
+
+var Group2 = func(group1 []string, group2 []string, group1Label string, group2Label string, nowhereLabel string) Compute[string] {
+	return func(elements []string) string {
+		for _, e := range group1 {
+			if elements[0] == e {
+				return group1Label
+			}
+		}
+		for _, e := range group2 {
+			if elements[0] == e {
+				return group2Label
+			}
+		}
+		return nowhereLabel
 	}
 }
 

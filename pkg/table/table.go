@@ -147,8 +147,10 @@ func (t *Table[T]) Generate() error {
 }
 
 func (t *Table[T]) ToCSV() string {
+	columnLabels := t.columnHeaders.labels(true, true)
+	rowLabels := t.rowHeaders.labels(true, true)
 	var sb strings.Builder
-	for _, columnLabel := range t.columnHeaders.labels(true, true) {
+	for _, columnLabel := range columnLabels {
 		if columnLabel == "" {
 			_, _ = fmt.Fprint(&sb, ";Total")
 		} else {
@@ -156,13 +158,12 @@ func (t *Table[T]) ToCSV() string {
 		}
 	}
 	_, _ = fmt.Fprintln(&sb)
-	for _, rowLabel := range t.rowHeaders.labels(true, true) {
+	for _, rowLabel := range rowLabels {
 		if rowLabel == "" {
 			_, _ = fmt.Fprint(&sb, "Total;")
 		} else {
 			_, _ = fmt.Fprint(&sb, rowLabel+";")
 		}
-		columnLabels := t.columnHeaders.labels(true, true)
 		for i, columnLabel := range columnLabels {
 			v, ok := t.pivot[rowLabel][columnLabel]
 			if ok {
