@@ -213,18 +213,17 @@ func main() {
 	}
 	//otaManagers := []string{
 	//	"Pereira Carrari, Mr Mauricio",
-	//	"Khan,Akram Raza",
-	//	"Kumar,Vikash",
-	//	"Franco Mora,Richard Miguel",
-	//	"Mehta,Ashish",
-	//	"KUMAR,Narendra",
 	//	"Letolle,Nicolas",
 	//	"Vila,Christophe",
+	//	"Kumar,Vikash",
+	//	"Franco Mora,Richard Miguel",
 	//	"Fesquet,Sebastien",
+	//	"Pethia,Abhishek",
+	//	"Khan,Akram Raza",
+	//	"Mehta,Ashish",
+	//	"KUMAR,Narendra",
 	//	"Gupta,Anshul",
 	//	"Kumar,Vivek",
-	//	"BANSAL,ANKIT",
-	//	"Bhardwaj,Abhishek",
 	//}
 	tcd := table.NewFloatTable(rawData).
 		//Filter(1, table.In(otaManagers)).
