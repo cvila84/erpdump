@@ -2,7 +2,7 @@ package ebs
 
 // AOTA Dev
 // No budget
-var AotaDevCheckPeople = []string{
+var aotaDevCheckPeople = []string{
 	"Agrawal,Somya",
 	"Arora,Sheffali",
 	"Choubisa,Vidhi",
@@ -13,7 +13,7 @@ var AotaDevCheckPeople = []string{
 // Kriss: 17609h / 867227€
 // Mauricio: 17503h / 862033€
 
-var AotaL3BudgetPeople = []string{
+var aotaL3BudgetPeople = []string{
 	"Agrawal,Somya",
 	"Bhatia,Akhil",
 	"Choubisa,Vidhi",
@@ -29,7 +29,7 @@ var AotaL3BudgetPeople = []string{
 	"Sharma,Naveen",
 }
 
-var AotaL3CheckPeople = []string{
+var aotaL3CheckPeople = []string{
 	"Devanjali,Devanjali",
 	"Dubey,Parul",
 	"GOYAL,JAIDEV",
@@ -46,7 +46,7 @@ var AotaL3CheckPeople = []string{
 // Kriss: xh / x€
 // Mauricio: xh / x€
 
-var CotaPeople = []string{
+var cotaPeople = []string{
 	// IOT
 	"ATMOPAWIRO,ALSASIAN",
 	"Gattone,Alain",
@@ -157,19 +157,19 @@ var CotaPeople = []string{
 	"VOHRA,Mitali",
 }
 
-var TacBudgetPeople = []string{
+var tacBudgetPeople = []string{
 	// Applet
 	"ABAO, Mr MICHAEL CARLO",
 	"ONG, Mr WILSON LEE",
 	// Server
 }
 
-var TacCheckPeople = []string{
+var tacCheckPeople = []string{
 	// Applet
 	// Server
 }
 
-var Managers = []string{
+var managers = []string{
 	"Pereira Carrari, Mr Mauricio",
 	"Letolle,Nicolas",
 	"Vila,Christophe",

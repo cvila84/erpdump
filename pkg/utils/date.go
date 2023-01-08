@@ -5,7 +5,19 @@ import (
 	"time"
 )
 
-func ParseDate(date string) (int, int, int, error) {
+func ParseDateYYYYsMM(date string) (int, int, error) {
+	month, err := strconv.Atoi(date[5:7])
+	if err != nil {
+		return 0, 0, err
+	}
+	year, err := strconv.Atoi(date[0:4])
+	if err != nil {
+		return 0, 0, err
+	}
+	return month, year, nil
+}
+
+func ParseDateDDsMMMsYYYY(date string) (int, int, int, error) {
 	day, err := strconv.Atoi(date[0:2])
 	if err != nil {
 		return 0, 0, 0, err

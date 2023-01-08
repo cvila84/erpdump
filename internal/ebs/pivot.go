@@ -1,17 +1,15 @@
 package ebs
 
 import (
-	"bufio"
 	"github.com/cvila84/erpdump/pkg/pivot"
-	"os"
 )
 
 func GenerateFromEBSExport(csvData string, csvTable string) error {
-	weeklyTimeCards, err := readCsvFile(csvData)
+	rawData, err := readCsvFile(csvData)
 	if err != nil {
 		return err
 	}
-	monthlyData, err := GroupEBSTimeCardsByMonth(weeklyTimeCards)
+	pivotData, err := groupEBSTimeCardsByMonth(rawData)
 	if err != nil {
 		return err
 	}
@@ -20,12 +18,12 @@ func GenerateFromEBSExport(csvData string, csvTable string) error {
 	// record[2]=project
 	// record[3]=task
 	// record[4-15]=hours(monthly)
-	table := pivot.NewFloatTable(monthlyData).
+	table := pivot.NewFloatTable(pivotData).
 		//Filter(1, table.In(otaManagers)).
-		Filter(2, pivot.In(OtaProjects)).
+		Filter(2, pivot.In(otaProjects)).
 		//Row([]int{0}, table.Group([][]string{OtaPeople}, []string{"OTA"}, "External"), nil, table.AlphaSort).
 		Row([]int{0}, nil, nil, pivot.AlphaSort).
-		Column([]int{2}, pivot.Group([][]string{OtaProjects, FunctionalProjects}, []string{"OTA", "Functional"}, "Other"), nil, pivot.AlphaSort).
+		Column([]int{2}, pivot.Group([][]string{otaProjects, functionalProjects}, []string{"OTA", "Functional"}, "Other"), nil, pivot.AlphaSort).
 		StandardColumn(2).
 		//StandardColumn(3).
 		Values([]int{4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15}, pivot.YearlyHours, pivot.Sum, nil)
@@ -33,34 +31,27 @@ func GenerateFromEBSExport(csvData string, csvTable string) error {
 	if err != nil {
 		return err
 	}
-	file, err := os.Create(csvTable)
-	if err != nil {
-		return err
-	}
-	writer := bufio.NewWriter(file)
-	_, err = writer.WriteString(table.ToCSV())
-	if err != nil {
-		return err
-	}
-	err = writer.Flush()
-	if err != nil {
-		return err
-	}
-	err = file.Close()
-	if err != nil {
-		return err
-	}
-	return nil
+	return saveCsvFile(csvTable, table.ToCSV())
 }
 
 func GenerateFromFinanceExport(csvData string, csvTable string) error {
-	//budgetPivotRawData, err := readCsvFile(csvData)
-	//if err != nil {
-	//	return err
-	//}
-	//monthlyData, err := FilterBudgetPivotData(budgetPivotRawData)
-	//if err != nil {
-	//	return err
-	//}
-	return nil
+	rawData, err := readCsvFile(csvData)
+	if err != nil {
+		return err
+	}
+	pivotData, err := filterBudgetPivotData(rawData)
+	if err != nil {
+		return err
+	}
+	// record[0]=employee
+	// record[1]=project
+	// record[2-13]=hours
+	// record[14-25]=cost
+	table := pivot.NewFloatTable(pivotData).
+		StandardRow(0)
+	err = table.Generate()
+	if err != nil {
+		return err
+	}
+	return saveCsvFile(csvTable, table.ToCSV())
 }
