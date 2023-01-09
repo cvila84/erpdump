@@ -1,17 +1,19 @@
 package ebs
 
 import (
+	"fmt"
 	"github.com/cvila84/erpdump/pkg/pivot"
+	"path/filepath"
 )
 
-func GenerateFromEBSExport(csvData string, csvTable string) error {
-	rawData, err := readCsvFile(csvData)
+func GenerateFromEBSExport(csvDataFile, csvTablePath, csvTablePrefix string) error {
+	rawData, err := readCsvFile(csvDataFile)
 	if err != nil {
-		return err
+		return fmt.Errorf("while reading %s: %w", csvDataFile, err)
 	}
-	pivotData, err := groupEBSTimeCardsByMonth(rawData)
+	pivotData, err := groupEBSTimeCardsByMonth(rawData[1:])
 	if err != nil {
-		return err
+		return fmt.Errorf("while processing raw csv data: %w", err)
 	}
 	// record[0]=employee
 	// record[1]=manager
@@ -31,17 +33,21 @@ func GenerateFromEBSExport(csvData string, csvTable string) error {
 	if err != nil {
 		return err
 	}
-	return saveCsvFile(csvTable, table.ToCSV())
+	return saveCsvFile(csvTablePath+string(filepath.Separator)+csvTablePrefix+".csv", table.ToCSV())
 }
 
-func GenerateFromFinanceExport(csvData string, csvTable string) error {
-	rawData, err := readCsvFile(csvData)
-	if err != nil {
-		return err
+func GenerateFromFinanceExport(csvDataFiles []string, csvTablePath, csvTablePrefix string) error {
+	var allRawData [][]string
+	for _, csvDataFile := range csvDataFiles {
+		rawData, err := readCsvFile(csvDataFile)
+		if err != nil {
+			return fmt.Errorf("while reading %s: %w", csvDataFile, err)
+		}
+		allRawData = append(allRawData, rawData[1:]...)
 	}
-	pivotData, err := filterBudgetPivotData(rawData)
+	pivotData, err := filterBudgetPivotData(allRawData)
 	if err != nil {
-		return err
+		return fmt.Errorf("while processing raw csv data: %w", err)
 	}
 	// record[0]=employee
 	// record[1]=project
@@ -49,6 +55,18 @@ func GenerateFromFinanceExport(csvData string, csvTable string) error {
 	// record[3-14]=hours
 	// record[15-26]=cost
 	table := pivot.NewFloatTable(pivotData).
+		Row([]int{0}, nil, nil, pivot.AlphaSort).
+		Column([]int{1}, nil, nil, pivot.AlphaSort).
+		Values([]int{3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14}, pivot.YearlyHours, pivot.Sum, nil)
+	err = table.Generate()
+	if err != nil {
+		return err
+	}
+	err = saveCsvFile(csvTablePath+string(filepath.Separator)+csvTablePrefix+"1.csv", table.ToCSV())
+	if err != nil {
+		return err
+	}
+	table = pivot.NewFloatTable(pivotData).
 		Row([]int{1}, nil, nil, pivot.AlphaSort).
 		Row([]int{0}, nil, nil, pivot.AlphaSort).
 		StandardColumn(2).
@@ -57,5 +75,5 @@ func GenerateFromFinanceExport(csvData string, csvTable string) error {
 	if err != nil {
 		return err
 	}
-	return saveCsvFile(csvTable, table.ToCSV())
+	return saveCsvFile(csvTablePath+string(filepath.Separator)+csvTablePrefix+"2.csv", table.ToCSV())
 }

@@ -1,88 +1,163 @@
 package ebs
 
-var TOSORT = [][]string{
-	{"", "Toschi Guilherme"},
-	{"", "Rajput Yashwant Singh"},
-	{"", "Vikas Vikas"},
-	{"", "Leal Rainier"},
-	{"", "Patel Kamal"},
-	{"", "Garduno Sanchez Victor Hugo"},
-	{"", "Prigent Francois"},
-	{"", "Tacussel Philippe"},
-	{"", "Fedai Artem"},
-	{"", "Freimonas Romas"},
-	{"", "Theil Fabienne"},
-	{"", "Aguilera Palomino Diego"},
-	{"", "Prakash Virender"},
-	{"", "Mateo Vladimir Lennard"},
-	{"", "Royeca Zigmund Zer"},
-	{"", "LAI SER WEI"},
-	{"", "Myslivets Alexey"},
-	{"", "Singh Gaurav"},
-	{"", "Valette Karine"},
-	{"", "Dubuc Laurent"},
-	{"", "Navarrete Perez Hector Luis"},
-	{"", "Jaramilla Michael Christian"},
-	{"", "Gulyani Sahil"},
-	{"", "Kumar Pramod"},
-	{"", "Miani Alberto"},
-	{"", "Qualizza Michele"},
-	{"", "Manchanda Jatin"},
-	{"", "Sharma Gaurav"},
-	{"", "Yadav Sanjeet"},
-	{"", "Tcherniack Laurent"},
-	{"", "Almanza Roman Ines Atenea"},
-	{"", "Tovar Jonathan Josué"},
-	{"", "Singh Alok"},
-	{"", "Jones Terence"},
-	{"", "Maille Caroline"},
+/*
+Delta with baseline/forecast: +1 SM in Praha agreed by Mauricio [R1R29750]
+Delta with baseline/forecast: +2 ppl in Noida agreed by Mauricio to compensate turn-overs [R1R29750]
+Delta with baseline/forecast: Praha new infrastructure agreed by ? [R1R29751]
+Delta with baseline/forecast: QA black raised 800$/month of AWS costs agreed by ? [R1R29751]
+Delta with baseline/forecast: +1 ppl (13->14) for AOTA L3 agreed by Mauricio [R0S29752]
+*/
+
+// Delta with baseline/forecast: TLS 1.3 development (93md on waf+psk-provider) approved by Nagy [R1R29750]
+var ext29750Tls13People = [][]string{
+	{"Bretagne,Eric", "Bretagne Eric"},
 	{"", "Oumohand Rachid"},
-	{"", "Chantre Thierry"},
-	{"", "Halagunde Vinayak Punja"},
-	{"", "Castano Esteban"},
-	{"", "Scheerders Bruno"},
-	{"", "Nandiraju Pavan Kumar"},
-	{"", "Detcheverry Frank"},
 	{"", "Kumar Singh Shishir"},
-	{"", "Giva Joana Marie"},
-	{"", "Shamsudin Nurrasyidah"},
-	{"", "Ayasse Jerome"},
-	{"", "Singh Chandan Kumar"},
-	{"", "Espinosa Alen"},
-	{"", "Berard Xavier"},
-	{"", "Rana Ritika"},
-	{"", "Perez Lagunas Daniela"},
-	{"", "Dumitrescu Florin"},
-	{"", "Eleserio Ederlyn"},
-	{"", "Lambert Patrick"},
-	{"", "Marciniak Mateusz"},
-	{"", "Salem Butch Ellen Grace"},
-	{"", "Ververis Konstantinos"},
-	{"", "Lacouture Dominique"},
-	{"", "Shevnin Ignat"},
-	{"", "Marquez Justin"},
-	{"", "Virmani Karan"},
-	{"", "Bretagne Eric"},
-	{"", "Kehyayan Stephane"},
-	{"", "Loos Michel"},
-	{"", "Galindo Gomez Jorge"},
-	{"", "Kobr Dan"},
-	{"", "Alarcon galvez Fernando"},
-	{"", "Huerta martinez Jesus"},
-	{"", "Ocampo Gonzalez Francisco Javier"},
-	{"", "Kalra Prashant"},
-	{"", "N/A"},
 }
 
-// AOTA Dev
-// No budget
-var aotaDevCheckPeople = [][]string{}
+// Delta with baseline/forecast: NGM-Datadog migration agreed by Mauricio [R1R29750]
+var ext29750NgmMigrationPeople = [][]string{
+	{"", "Toschi Guilherme"},
+}
 
-// AOTA L3
+// Delta with baseline/forecast: New refresh applet, MIV2 study for NB-IOT, Applet study to transform 4G card into 5G agreed by Nagy [R1R29750]
+var ext29750NewAppletsPeople = [][]string{
+	{"", "Abao Michael Carlo"},
+	{"", "Giva Joana Marie"},
+	{"", "Marquez Justin"},
+}
+
+// Delta with baseline/forecast: MyOSD team contribution [R1R29750]
+var ext29750MyosdTeamPeople = [][]string{
+	{"", "Navarrete Perez Hector Luis"},
+}
+
+// Delta with baseline/forecast: OTA demo tenant approved by Jérome Voyer [R1R29751]
+var ext29751OtaDemoTenantPeople = [][]string{
+	{"", "Virmani Karan"},
+}
+
+// Delta with baseline/forecast: European digital wallet agreed by Samir Khlif (IBS) [R1R29753]
+var ext29753DigitalWalletPeople = [][]string{
+	{"Gattone,Alain", "Gattone Alain"},
+	{"Berard,Xavier", "Berard Xavier"},
+}
+
+// Delta with baseline/forecast: Private Network and xRIM aaS agreed by Mauricio [R1R29753]
+var ext29753privateNetworkPeople = [][]string{
+	{"", "Prigent Francois"},
+}
+
+// Delta with baseline/forecast: Transatel DP+ flow activation for 3k€ [R1R30027]
+var ext30027transatelActPeople = [][]string{
+	{"", "Ayasse Jerome"},
+}
+
+// R0R29805 Central R&D
+// 366k€
+var centralRDPeople = [][]string{
+	{"", "Chantre Thierry"},
+	{"", "Detcheverry Frank"},
+	{"", "Jaramilla Michael Christian"},
+	{"", "Kehyayan Stephane"},
+	{"", "Lacouture Dominique"},
+	{"", "Lambert Patrick"},
+	{"", "Leal Rainier"},
+	{"", "Maille Caroline"},
+	{"", "Mateo Vladimir Lennard"},
+	{"", "Royeca Zigmund Zer"},
+	{"", "Salem Butch Ellen Grace"},
+	{"", "Scheerders Bruno"},
+	{"", "Tacussel Philippe"},
+	{"", "Theil Fabienne"},
+}
+
+// R0T30005 Transversal
+// 478k€
+var transversalPeople = [][]string{
+	{"", "Almanza Roman Ines Atenea"},
+	{"Bretagne,Eric", "Bretagne Eric"},
+	{"", "Dubuc Laurent"},
+	{"", "Garduno Sanchez Victor Hugo"},
+	{"", "Gulyani Sahil"},
+	{"", "Huerta martinez Jesus"},
+	{"", "Kumar Pramod"},
+	{"Kumar,Vivek", "Kumar Vivek"},
+	{"", "Loos Michel"},
+	{"", "Manchanda Jatin"},
+	{"", "Patel Kamal"},
+	{"", "Prakash Virender"},
+	{"", "Prigent Francois"},
+	{"", "Qualizza Michele"},
+	{"", "Singh Alok"},
+	{"", "Singh Chandan Kumar"},
+	{"", "Singh Gaurav"},
+	{"", "Tcherniack Laurent"},
+	{"", "Tovar Jonathan Josué"},
+	{"", "Yadav Sanjeet"},
+}
+
+// R0R29754 Improvement
+// 2ppl/12m/100%
+// Kriss: 3420h / 168435€
+// Vertical: 2992h / 147356€
+var improvmentBudgetPeople = [][]string{
+	{"Hernandez Castaneda,Jose Guillermo", "Hernandez Castaneda Jose Guillermo"},
+	{"Oremus,Tomas", "Oremus Tomas"},
+}
+var improvmentNewPeople = [][]string{
+	{"ATMOPAWIRO,ALSASIAN", "ATMOPAWIRO ALSASIAN"},
+	{"Berard,Xavier", "Berard Xavier"},
+	{"Cerny,Jaroslav", "Cerny Jaroslav"},
+	{"Gattone,Alain", "Gattone Alain"},
+	{"", "Halagunde Vinayak Punja"},
+	{"", "Marciniak Mateusz"},
+	{"", "Rajput Yashwant Singh"},
+	{"", "Rana Ritika"},
+	{"", "Ververis Konstantinos"},
+	{"", "Vikas Vikas"},
+}
+
+// R1R29753 Innovation
+// 2.5ppl/12m/100%
+// Kriss: 3971h / 413977€
+// Vertical: 3740h / 389895€
+var innovationBudgetPeople = [][]string{
+	{"", "Abao Michael Carlo"},
+	{"", "ABAO MICHAEL CARLO"},
+	{"Bretagne,Eric", "Bretagne Eric"},
+	{"", "Castano Esteban"},
+	{"Cerny,Jaroslav", "Cerny Jaroslav"},
+	{"Deepak,Deepak", "Deepak Deepak"},
+	{"Dhondiyal,Rituraj", "Dhondiyal Rituraj"},
+	{"", "Eleserio Ederlyn"},
+	{"", "Freimonas Romas"},
+	{"", "Giva Joana Marie"},
+	{"", "Kobr Dan"}, // KMT
+	{"Kumar,Anshuman", "Kumar Anshuman"},
+	{"Lachowicz,Daniel", "Lachowicz Daniel"},
+	{"", "LAI SER WEI"},
+	{"", "Marquez Justin"},
+	{"", "Miani Alberto"}, // KMT
+	{"", "ONG WILSON LEE"},
+	{"", "Sharma Gaurav"},
+	{"", "Virmani Karan"},
+}
+var innovationNewPeople = [][]string{}
+
+// R1R29750 AOTA Dev
+// No budget
+var aotaDevBudgetPeople = [][]string{}
+var aotaDevNewPeople = [][]string{
+	{"Agrawal,Somya", "Agrawal Somya"},
+	{"Arora,Sheffali", "Arora Sheffali"},
+	{"Choubisa,Vidhi", "Choubisa Vidhi"},
+}
+
+// R0S29752 AOTA L3
 // 13ppl/12m/90%
 // Kriss: 17609h / 867227€
-// Mauricio: 17503h / 862033€
-
+// Vertical: 17503h / 862033€
 var aotaL3BudgetPeople = [][]string{
 	{"Agrawal,Somya", "Agrawal Somya"},
 	{"Arora,Sheffali", "Arora Sheffali"},
@@ -98,66 +173,102 @@ var aotaL3BudgetPeople = [][]string{
 	{"Shameem,Bilal", "Shameem Bilal"},
 	{"Sharma,Naveen", "Sharma Naveen"},
 }
-
-var aotaL3CheckPeople = [][]string{
+var aotaL3NewPeople = [][]string{
 	{"Devanjali,Devanjali", "Devanjali Devanjali"},
 	{"Dubey,Parul", "Dubey Parul"},
 	{"GOYAL,JAIDEV", "GOYAL JAIDEV"},
 	{"Gupta,Swati", "Gupta Swati"},
+	{"", "Kalra Prashant"},
 	{"KUMAR,Rahul", "KUMAR Rahul"},
 	{"Martinez Carino,Conrado", "Martinez Carino Conrado"},
+	{"", "Ocampo Gonzalez Francisco Javier"},
 	{"Perez Cuellar,Julio Cesar", "Perez Cuellar Julio Cesar"},
 	{"SAHADEVAN,SANU", "SAHADEVAN SANU"},
 	{"Srivastava,Sahil", "Srivastava Sahil"},
 }
 
-// COTA Dev
-// xppl/xm/x%
-// Kriss: xh / x€
-// Mauricio: xh / x€
-
-var cotaPeople = [][]string{
-	// IOT
-	{"ATMOPAWIRO,ALSASIAN", "ATMOPAWIRO ALSASIAN"},
-	{"Gattone,Alain", "Gattone Alain"},
-	// VM POC
-	{"Dokladal,Jakub", "Dokladal Jakub"},
-	{"Lachowicz,Daniel", "Lachowicz Daniel"},
-	{"Przytarski,Bartlomiej", "Przytarski Bartlomiej"},
-	{"Sedlacek,Ondrej", "Sedlacek Ondrej"},
+// R1R29751 COTA Platform SaaS
+// (PT/FR) 3ppl/12m/100%
+// (PT/IN) 5ppl/12m/100%
+// Kriss: 12211h / 601402€
+// Vertical: 4488h / 221034€
+// R1R29751 COTA Platform NFV
+// (PT/FR) 1ppl/12m/100%
+// (PT/CZ) 4ppl/6m/50%
+// Kriss: 3297h / 162353€
+// Vertical: 1496h / 73678€
+var cotaPtfBudgetPeople = [][]string{
 	// SaaS
-	{"Cerny,Jaroslav", "Cerny Jaroslav"},
 	{"Deepak,Deepak", "Deepak Deepak"},
-	{"Kumar,Anshuman", "Kumar Anshuman"},
+	{"Dhondiyal,Rituraj", "Dhondiyal Rituraj"},
 	{"LAMBA,PREETIKA", "LAMBA PREETIKA"},
 	{"Levacher,Frederic", "Levacher Frederic"},
-	{"LIM, Mr BERNARD KENNETH", "LIM BERNARD KENNETH"},
 	{"Ragot,Emmanuel", "Ragot Emmanuel"},
 	{"Roucheton,Jerome", "Roucheton Jerome"},
 	{"Singh,Pradeep", "Singh Pradeep"},
 	{"Singh,Yash Pal", "Singh Yash Pal"},
 	// Strategic
-	// ONLY COGS {"Bories,Clement", "Bories Clement"},
-	// ONLY COGS {"Cabrera,Marcos", "Cabrera Marcos"},
 	{"Chiaramello,Daniel", "Chiaramello Daniel"},
-	{"Gukanti,Sandeep", "Gukanti Sandeep"},
-	{"Letolle,Nicolas", "Letolle Nicolas"},
-	{"Schammass,Alexandre", "Schammass Alexandre"},
-	// France
+	{"Dokladal,Jakub", "Dokladal Jakub"},
+	{"Lachowicz,Daniel", "Lachowicz Daniel"},
+	{"Przytarski,Bartlomiej", "Przytarski Bartlomiej"},
+	{"Sedlacek,Ondrej", "Sedlacek Ondrej"},
+}
+var cotaPtfNewPeople = [][]string{
+	{"", "Aguilera Palomino Diego"}, // support from deployment team
+	{"", "Alarcon galvez Fernando"}, // support from deployment team
+	//{"Bories,Clement", "Bories Clement"},
+	{"BHATNAGAR,AAKARSH", "BHATNAGAR AAKARSH"}, // newcomer to replace budgeted resource
+	{"Bretagne,Eric", "Bretagne Eric"},         // KMT
+	//{"Cabrera,Marcos", "Cabrera Marcos"},
+	{"", "Castano Esteban"},                                // support from L2
+	{"Cerny,Jaroslav", "Cerny Jaroslav"},                   // KMT
+	{"Delgado martinez,Alvaro", "Delgado martinez Alvaro"}, // KMT
+	{"Fioux,Sebastien", "Fioux Sebastien"},                 // SaaS platform team SM
+	{"", "Freimonas Romas"},                                // KMT
+	{"", "Galindo Gomez Jorge"},                            // ?
+	{"Gukanti,Sandeep", "Gukanti Sandeep"},                 // support from deployment team
+	{"", "Jones Terence"},                                  // support from DB expert team
+	{"Kumar,Anshuman", "Kumar Anshuman"},                   // support from deployment team
+	{"Letolle,Nicolas", "Letolle Nicolas"},                 // support from deployment team
+	{"LIM, Mr BERNARD KENNETH", "LIM BERNARD KENNETH"},     // support from DB expert team
+	{"", "Nandiraju Pavan Kumar"},                          // ?
+	{"", "Perez Lagunas Daniela"},                          // support from MyOSD team
+	{"Schammass,Alexandre", "Schammass Alexandre"},         // support from deployment team
+	{"Sharma,Aditya", "Sharma Aditya"},                     // newcomer to replace budgeted resource
+	{"", "Sharma Gaurav"},                                  // deployment/platform team manager
+	{"", "Valette Karine"},                                 // support from DB expert team
+}
+
+// R1R29750 COTA Dev
+// (Chiefs/FR) 3ppl/12m/100%
+// (PDA/CZ) 1ppl/12m/100%
+// (FT/FR) 1ppl/12m/100%
+// (FT/CZ) 13ppl/12m/90%
+// (FT/IN) 40ppl/12m/90%
+// (VM/CZ) 5ppl/6m/50%
+// Kriss: 83816h / 4127913€
+// Vertical: 80709h / 3974928x€
+// R0S29752 COTA L3
+// (FT/CZ) 13ppl/12m/10%
+// (FT/IN) 40ppl/12m/10%
+// Kriss: 8180h / 402855€
+// Vertical: 7929h / 390493€
+var cotaDevL3BudgetPeople = [][]string{
+	// Chiefs/FR
 	{"Cabagno,Anne", "Cabagno Anne"},
-	{"Tessier,Alexandra", "Tessier Alexandra"},
 	{"Fioux,Sebastien", "Fioux Sebastien"},
-	{"Coste,Florent", "Coste Florent"},
-	// Other
+	{"Tessier,Alexandra", "Tessier Alexandra"},
+	// PDA/CZ
 	{"Barilly,Adrien", "Barilly Adrien"},
-	{"Oremus,Tomas", "Oremus Tomas"},
-	// Prague
+	// FT/FR
+	{"Coste,Florent", "Coste Florent"},
+	// FT/CZ
 	{"Delgado martinez,Alvaro", "Delgado martinez Alvaro"},
 	{"Gatica Peralta,Elia Azucena", "Gatica Peralta Elia Azucena"},
 	{"Gorokhov,Nikita", "Gorokhov Nikita"},
 	{"Gorysz,Lukasz", "Gorysz Lukasz"},
 	{"Hamid,Juba", "Hamid Juba"},
-	{"Hernandez Castaneda,Jose Guillermo", "Hernandez Castaneda Jose Guillermo"},
 	{"Hlavacek,Ludek", "Hlavacek Ludek"},
 	{"Jiricek,Libor", "Jiricek Libor"},
 	{"Kalita,Victoria", "Kalita Victoria"},
@@ -170,7 +281,7 @@ var cotaPeople = [][]string{
 	{"Sramek,Vaclav", "Sramek Vaclav"},
 	{"Uzun,Eraslan", "Uzun Eraslan"},
 	{"Vondracek,Martin", "Vondracek Martin"},
-	// Noida
+	// FT/IN
 	{"Agrawal,Deepak", "Agrawal Deepak"},
 	{"Agrawal,Ritika", "Agrawal Ritika"},
 	{"Ali,Riyasat", "Ali Riyasat"},
@@ -199,7 +310,6 @@ var cotaPeople = [][]string{
 	{"kumar,Saurabh", "kumar Saurabh"},
 	{"Kumar,Sujit", "Kumar Sujit"},
 	{"Kumar,Vikas", "Kumar Vikas"},
-	{"Kumar,Vishesh", "Kumar Vishesh"},
 	{"Kumar,Vivek", "Kumar Vivek"},
 	{"PANDEY,Priyesh", "PANDEY Priyesh"},
 	{"Pandey,Renu", "Pandey Renu"},
@@ -224,19 +334,66 @@ var cotaPeople = [][]string{
 	{"Sirvya,Anshul", "Sirvya Anshul"},
 	{"Vats,Vishant Kumar", ""}, // not present in finance
 	{"VOHRA,Mitali", "VOHRA Mitali"},
+	// VM/CZ
+	{"Dokladal,Jakub", "Dokladal Jakub"},
+	{"", "Fedai Artem"},
+	{"Lachowicz,Daniel", "Lachowicz Daniel"},
+	{"Przytarski,Bartlomiej", "Przytarski Bartlomiej"},
+	{"Sedlacek,Ondrej", "Sedlacek Ondrej"},
+}
+var cotaDevL3CheckPeople = [][]string{
+	{"Chiaramello,Daniel", "Chiaramello Daniel"},                                 // support from platform team
+	{"Deepak,Deepak", "Deepak Deepak"},                                           // support from platform team
+	{"Hernandez Castaneda,Jose Guillermo", "Hernandez Castaneda Jose Guillermo"}, // support from SSC
 }
 
+// R1R30027 TAC Dev
+// 2ppl/12m/25%
+// Kriss: 847h / 40781€
+// Vertical: 748h / 35998€
 var tacBudgetPeople = [][]string{
 	// Applet
 	{"", "Abao Michael Carlo"},
-	{"", "ABAO MICHAEL CARLO"},
 	{"", "ONG WILSON LEE"},
 	// Server
 }
-
-var tacCheckPeople = []string{
+var tacCheckPeople = [][]string{
 	// Applet
+	{"", "Eleserio Ederlyn"},
+	{"", "Shamsudin Nurrasyidah"},
 	// Server
+	{"", "Dumitrescu Florin"},      // support from ODC
+	{"Gupta,Ankur", "Gupta Ankur"}, // server development was not in budget
+	{"Hernandez Castaneda,Jose Guillermo", "Hernandez Castaneda Jose Guillermo"}, // support from SSC
+	{"", "Myslivets Alexey"},               // support from ODC
+	{"", "Shevnin Ignat"},                  // support from ODC
+	{"Singh,Gurvinder", "Singh Gurvinder"}, // server development was not in budget
+	{"Singhal,Shivank", "Singhal Shivank"}, // server development was not in budget
+}
+
+// R1R30028 IOT Dev
+// (Experts) 2ppl/12m/25%
+// (FT/IN) 1ppl/12m/100%
+// (Applet) 1ppl/12m/25%
+// Kriss: 2734h / 179302€
+// Vertical: 2618h / 169656€
+var iotBudgetPeople = [][]string{
+	// Applet
+	{"", "LAI SER WEI"},
+	// Server
+	{"ATMOPAWIRO,ALSASIAN", "ATMOPAWIRO ALSASIAN"},
+	{"Gattone,Alain", "Gattone Alain"},
+	{"Kumar,Vishesh", "Kumar Vishesh"},
+}
+var iotCheckPeople = [][]string{
+	// Applet
+	{"", "Abao Michael Carlo"},
+	{"", "Eleserio Ederlyn"},
+	{"", "Espinosa Alen"},
+	// Server
+	{"Kumar,Vivek", "Kumar Vivek"}, // server development was not in budget
+	{"", "Prigent Francois"},
+	{"", "Yadav Sanjeet"},
 }
 
 var managers = []string{

@@ -3,6 +3,7 @@ package ebs
 import (
 	"bufio"
 	"encoding/csv"
+	"fmt"
 	"github.com/cvila84/erpdump/pkg/utils"
 	"os"
 	"strconv"
@@ -60,21 +61,19 @@ func saveCsvFile(filePath string, csvData string) error {
 // record[4-15]=hours(monthly)
 func groupEBSTimeCardsByMonth(csvData [][]string) ([][]interface{}, error) {
 	tams := &utils.Vector[timeAndMaterial]{ID: func(element timeAndMaterial) string { return element.employee }}
-	for i, record := range csvData {
-		if i > 0 {
-			employee := strings.TrimSpace(record[1])
-			tam, ok := tams.Get(employee)
-			if !ok {
-				tam = &timeAndMaterial{employee: employee, manager: strings.TrimSpace(record[0])}
-				tams.Add(tam)
-			}
-			month, monthHours, nextMonthHours, err := monthlyHours(record)
-			if err != nil {
-				return nil, err
-			}
-			if monthHours > 0 || nextMonthHours > 0 {
-				tam.AddHours(parseProjectID(record[9]), record[10], "", month, monthHours, nextMonthHours)
-			}
+	for _, record := range csvData {
+		employee := strings.TrimSpace(record[1])
+		tam, ok := tams.Get(employee)
+		if !ok {
+			tam = &timeAndMaterial{employee: employee, manager: strings.TrimSpace(record[0])}
+			tams.Add(tam)
+		}
+		month, monthHours, nextMonthHours, err := monthlyHours(record)
+		if err != nil {
+			return nil, fmt.Errorf("cannot parse week hour fields %v: %w", record, err)
+		}
+		if monthHours > 0 || nextMonthHours > 0 {
+			tam.AddHours(parseProjectID(record[9]), record[10], "", month, monthHours, nextMonthHours)
 		}
 	}
 	var rawData [][]interface{}
@@ -121,32 +120,30 @@ func groupEBSTimeCardsByMonth(csvData [][]string) ([][]interface{}, error) {
 
 func filterBudgetPivotData(csvData [][]string) ([][]interface{}, error) {
 	tams := &utils.Vector[timeAndMaterial]{ID: func(element timeAndMaterial) string { return element.employee }}
-	for i, record := range csvData {
-		if i > 0 {
-			employee := strings.TrimSpace(record[32])
-			tam, ok := tams.Get(employee)
-			if !ok {
-				tam = &timeAndMaterial{employee: employee}
-				tams.Add(tam)
-			}
-			month, _, err := utils.ParseDateYYYYsMM(record[3])
-			if err != nil {
-				return nil, err
-			}
-			record[40] = strings.Replace(record[40], ",", ".", 1)
-			monthHours, err := strconv.ParseFloat(record[40], 32)
-			if err != nil {
-				return nil, err
-			}
-			record[21] = strings.Replace(record[21], ",", ".", 1)
-			monthCost, err := strconv.ParseFloat(record[21], 32)
-			if err != nil {
-				return nil, err
-			}
-			if monthHours > 0 || monthCost > 0 {
-				tam.AddHours(record[14], "", record[26], month, monthHours, 0)
-				tam.AddCosts(record[14], record[26], month, monthCost)
-			}
+	for _, record := range csvData {
+		employee := strings.TrimSpace(record[32])
+		tam, ok := tams.Get(employee)
+		if !ok {
+			tam = &timeAndMaterial{employee: employee}
+			tams.Add(tam)
+		}
+		month, _, err := utils.ParseDateYYYYsMM(record[3])
+		if err != nil {
+			return nil, fmt.Errorf("cannot parse month field %q: %w", record[3], err)
+		}
+		record[40] = strings.Replace(record[40], ",", ".", 1)
+		monthHours, err := strconv.ParseFloat(record[40], 32)
+		if err != nil {
+			return nil, fmt.Errorf("cannot parse hours field %q: %w", record[40], err)
+		}
+		record[21] = strings.Replace(record[21], ",", ".", 1)
+		monthCost, err := strconv.ParseFloat(record[21], 32)
+		if err != nil {
+			return nil, fmt.Errorf("cannot parse hours field %q: %w", record[21], err)
+		}
+		if monthHours > 0 || monthCost > 0 {
+			tam.AddHours(record[14], "", record[26], month, monthHours, 0)
+			tam.AddCosts(record[14], record[26], month, monthCost)
 		}
 	}
 	var rawData [][]interface{}

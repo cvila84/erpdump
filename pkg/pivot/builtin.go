@@ -1,17 +1,23 @@
 package pivot
 
-import "sort"
+import (
+	"sort"
+	"strings"
+)
 
 var AlphaSort Sort = func(elements []string) []string {
-	sort.Strings(elements)
+	less := func(i, j int) bool {
+		return strings.ToLower(elements[i]) < strings.ToLower(elements[j])
+	}
+	sort.SliceStable(elements, less)
 	return elements
 }
 
 var ReverseAlphaSort Sort = func(elements []string) []string {
-	sort.Strings(elements)
-	for i, j := 0, len(elements)-1; i < j; i, j = i+1, j-1 {
-		elements[i], elements[j] = elements[j], elements[i]
+	less := func(i, j int) bool {
+		return strings.ToLower(elements[i]) > strings.ToLower(elements[j])
 	}
+	sort.SliceStable(elements, less)
 	return elements
 }
 
