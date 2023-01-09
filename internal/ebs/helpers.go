@@ -72,7 +72,7 @@ func groupEBSTimeCardsByMonth(csvData [][]string) ([][]interface{}, error) {
 		if err != nil {
 			return nil, fmt.Errorf("cannot parse week hour fields %v: %w", record, err)
 		}
-		if monthHours > 0 || nextMonthHours > 0 {
+		if monthHours != 0 || nextMonthHours != 0 {
 			tam.AddHours(parseProjectID(record[9]), record[10], "", month, monthHours, nextMonthHours)
 		}
 	}
@@ -138,12 +138,15 @@ func filterBudgetPivotData(csvData [][]string) ([][]interface{}, error) {
 		}
 		record[21] = strings.Replace(record[21], ",", ".", 1)
 		monthCost, err := strconv.ParseFloat(record[21], 32)
+		monthCost = -monthCost
 		if err != nil {
 			return nil, fmt.Errorf("cannot parse hours field %q: %w", record[21], err)
 		}
-		if monthHours > 0 || monthCost > 0 {
+		if monthHours != 0 || monthCost != 0 {
 			tam.AddHours(record[14], "", record[26], month, monthHours, 0)
 			tam.AddCosts(record[14], record[26], month, monthCost)
+		} else {
+			fmt.Printf("WARNING: entry %q / %q has no computed hours (%s) and/or costs (%s)\n", record[14], record[26], record[40], record[21])
 		}
 	}
 	var rawData [][]interface{}

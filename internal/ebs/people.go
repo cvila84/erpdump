@@ -1,5 +1,10 @@
 package ebs
 
+import (
+	"fmt"
+	"github.com/cvila84/erpdump/pkg/pivot"
+)
+
 /*
 Delta with baseline/forecast: +1 SM in Praha agreed by Mauricio [R1R29750]
 Delta with baseline/forecast: +2 ppl in Noida agreed by Mauricio to compensate turn-overs [R1R29750]
@@ -105,7 +110,7 @@ var improvmentBudgetPeople = [][]string{
 	{"Hernandez Castaneda,Jose Guillermo", "Hernandez Castaneda Jose Guillermo"},
 	{"Oremus,Tomas", "Oremus Tomas"},
 }
-var improvmentNewPeople = [][]string{
+var improvmentOtherPeople = [][]string{
 	{"ATMOPAWIRO,ALSASIAN", "ATMOPAWIRO ALSASIAN"},
 	{"Berard,Xavier", "Berard Xavier"},
 	{"Cerny,Jaroslav", "Cerny Jaroslav"},
@@ -143,12 +148,12 @@ var innovationBudgetPeople = [][]string{
 	{"", "Sharma Gaurav"},
 	{"", "Virmani Karan"},
 }
-var innovationNewPeople = [][]string{}
+var innovationOtherPeople = [][]string{}
 
 // R1R29750 AOTA Dev
 // No budget
 var aotaDevBudgetPeople = [][]string{}
-var aotaDevNewPeople = [][]string{
+var aotaDevOtherPeople = [][]string{
 	{"Agrawal,Somya", "Agrawal Somya"},
 	{"Arora,Sheffali", "Arora Sheffali"},
 	{"Choubisa,Vidhi", "Choubisa Vidhi"},
@@ -173,7 +178,7 @@ var aotaL3BudgetPeople = [][]string{
 	{"Shameem,Bilal", "Shameem Bilal"},
 	{"Sharma,Naveen", "Sharma Naveen"},
 }
-var aotaL3NewPeople = [][]string{
+var aotaL3OtherPeople = [][]string{
 	{"Devanjali,Devanjali", "Devanjali Devanjali"},
 	{"Dubey,Parul", "Dubey Parul"},
 	{"GOYAL,JAIDEV", "GOYAL JAIDEV"},
@@ -214,7 +219,7 @@ var cotaPtfBudgetPeople = [][]string{
 	{"Przytarski,Bartlomiej", "Przytarski Bartlomiej"},
 	{"Sedlacek,Ondrej", "Sedlacek Ondrej"},
 }
-var cotaPtfNewPeople = [][]string{
+var cotaPtfOtherPeople = [][]string{
 	{"", "Aguilera Palomino Diego"}, // support from deployment team
 	{"", "Alarcon galvez Fernando"}, // support from deployment team
 	//{"Bories,Clement", "Bories Clement"},
@@ -341,7 +346,7 @@ var cotaDevL3BudgetPeople = [][]string{
 	{"Przytarski,Bartlomiej", "Przytarski Bartlomiej"},
 	{"Sedlacek,Ondrej", "Sedlacek Ondrej"},
 }
-var cotaDevL3CheckPeople = [][]string{
+var cotaDevL3OtherPeople = [][]string{
 	{"Chiaramello,Daniel", "Chiaramello Daniel"},                                 // support from platform team
 	{"Deepak,Deepak", "Deepak Deepak"},                                           // support from platform team
 	{"Hernandez Castaneda,Jose Guillermo", "Hernandez Castaneda Jose Guillermo"}, // support from SSC
@@ -357,7 +362,7 @@ var tacBudgetPeople = [][]string{
 	{"", "ONG WILSON LEE"},
 	// Server
 }
-var tacCheckPeople = [][]string{
+var tacOtherPeople = [][]string{
 	// Applet
 	{"", "Eleserio Ederlyn"},
 	{"", "Shamsudin Nurrasyidah"},
@@ -385,7 +390,7 @@ var iotBudgetPeople = [][]string{
 	{"Gattone,Alain", "Gattone Alain"},
 	{"Kumar,Vishesh", "Kumar Vishesh"},
 }
-var iotCheckPeople = [][]string{
+var iotOtherPeople = [][]string{
 	// Applet
 	{"", "Abao Michael Carlo"},
 	{"", "Eleserio Ederlyn"},
@@ -409,4 +414,103 @@ var managers = []string{
 	"KUMAR,Narendra",
 	"Gupta,Anshul",
 	"Kumar,Vivek",
+}
+
+type projectTeam struct {
+	budget    []string
+	extension []string
+	other     []string
+}
+
+var projectsTeam map[string]projectTeam
+
+var projectGroups = func(prefixProject bool) pivot.Compute[string] {
+	return func(elements []string) string {
+		var prefix string
+		if prefixProject {
+			prefix = elements[0] + "-"
+		}
+		team, ok := projectsTeam[elements[0]]
+		if ok {
+			for _, p := range team.budget {
+				if p == elements[1] {
+					return prefix + "Budget"
+				}
+			}
+			for _, p := range team.extension {
+				if p == elements[1] {
+					return prefix + "Ext"
+				}
+			}
+			for _, p := range team.other {
+				if p == elements[1] {
+					return prefix + "Other"
+				}
+			}
+		}
+		return prefix + "Unknown"
+	}
+}
+
+func uniquePeople(index int, peopleLists ...[][]string) []string {
+	var result []string
+	for _, l1 := range peopleLists {
+		for _, l2 := range l1 {
+			if len(l2[index]) > 0 {
+				present := false
+				for _, p := range result {
+					if l2[index] == p {
+						present = true
+						fmt.Printf("WARNING: same key detected: %q\n", p)
+					}
+				}
+				if !present {
+					result = append(result, l2[index])
+				}
+			}
+		}
+	}
+	return result
+}
+
+func init() {
+	projectsTeam = make(map[string]projectTeam)
+	projectsTeam["R1R29750"] = projectTeam{
+		budget:    uniquePeople(1, aotaDevBudgetPeople, cotaDevL3BudgetPeople),
+		extension: uniquePeople(1, ext29750MyosdTeamPeople, ext29750Tls13People, ext29750NewAppletsPeople, ext29750NgmMigrationPeople),
+		other:     uniquePeople(1, aotaDevOtherPeople, cotaDevL3OtherPeople),
+	}
+	projectsTeam["R1R29751"] = projectTeam{
+		budget:    uniquePeople(1, cotaPtfBudgetPeople),
+		extension: uniquePeople(1, ext29751OtaDemoTenantPeople),
+		other:     uniquePeople(1, cotaPtfOtherPeople),
+	}
+	projectsTeam["R0S29752"] = projectTeam{
+		budget: uniquePeople(1, aotaL3BudgetPeople, cotaDevL3BudgetPeople),
+		other:  uniquePeople(1, aotaL3OtherPeople, cotaDevL3OtherPeople),
+	}
+	projectsTeam["R1R29753"] = projectTeam{
+		budget:    uniquePeople(1, innovationBudgetPeople),
+		extension: uniquePeople(1, ext29753DigitalWalletPeople, ext29753privateNetworkPeople),
+		other:     uniquePeople(1, innovationOtherPeople),
+	}
+	projectsTeam["R0R29754"] = projectTeam{
+		budget: uniquePeople(1, improvmentBudgetPeople),
+		other:  uniquePeople(1, improvmentOtherPeople),
+	}
+	projectsTeam["R0R29805"] = projectTeam{
+		budget: uniquePeople(1, centralRDPeople),
+	}
+	projectsTeam["R0T30005"] = projectTeam{
+		budget: uniquePeople(1, transversalPeople),
+	}
+	projectsTeam["R1R30027"] = projectTeam{
+		budget:    uniquePeople(1, tacBudgetPeople),
+		extension: uniquePeople(1, ext30027transatelActPeople),
+		other:     uniquePeople(1, tacOtherPeople),
+	}
+	projectsTeam["R1R30028"] = projectTeam{
+		budget: uniquePeople(1, iotBudgetPeople),
+		other:  uniquePeople(1, iotOtherPeople),
+	}
 }
