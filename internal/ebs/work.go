@@ -6,26 +6,27 @@ import (
 )
 
 type projectTAM struct {
-	hours map[string][]float64
-	costs []float64
+	category string
+	hours    map[string][]float64
+	costs    []float64
 }
 
 type timeAndMaterial struct {
 	employee string
 	manager  string
-	kind     string
 	projects map[string]*projectTAM
 }
 
-func (t *timeAndMaterial) AddHours(projectName string, taskName string, month int, hoursInMonth float64, hoursInNextMonth float64) {
+func (t *timeAndMaterial) AddHours(projectName, taskName, category string, month int, hoursInMonth, hoursInNextMonth float64) {
 	if t.projects == nil {
 		t.projects = make(map[string]*projectTAM)
 	}
 	project, ok := t.projects[projectName]
 	if !ok {
 		project = &projectTAM{
-			hours: make(map[string][]float64),
-			costs: make([]float64, 12),
+			category: category,
+			hours:    make(map[string][]float64),
+			costs:    make([]float64, 12),
 		}
 		t.projects[projectName] = project
 	}
@@ -40,15 +41,16 @@ func (t *timeAndMaterial) AddHours(projectName string, taskName string, month in
 	}
 }
 
-func (t *timeAndMaterial) AddCosts(projectName string, month int, costsInMonth float64) {
+func (t *timeAndMaterial) AddCosts(projectName, category string, month int, costsInMonth float64) {
 	if t.projects == nil {
 		t.projects = make(map[string]*projectTAM)
 	}
 	project, ok := t.projects[projectName]
 	if !ok {
 		project = &projectTAM{
-			hours: make(map[string][]float64),
-			costs: make([]float64, 12),
+			category: category,
+			hours:    make(map[string][]float64),
+			costs:    make([]float64, 12),
 		}
 		t.projects[projectName] = project
 	}

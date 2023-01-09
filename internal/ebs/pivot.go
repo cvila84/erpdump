@@ -45,12 +45,14 @@ func GenerateFromFinanceExport(csvData string, csvTable string) error {
 	}
 	// record[0]=employee
 	// record[1]=project
-	// record[2-13]=hours
-	// record[14-25]=cost
+	// record[2]=category
+	// record[3-14]=hours
+	// record[15-26]=cost
 	table := pivot.NewFloatTable(pivotData).
-		StandardRow(0).
-		StandardColumn(1).
-		Values([]int{2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13}, pivot.YearlyHours, pivot.Sum, nil)
+		Row([]int{1}, nil, nil, pivot.AlphaSort).
+		Row([]int{0}, nil, nil, pivot.AlphaSort).
+		StandardColumn(2).
+		Values([]int{3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14}, pivot.YearlyHours, pivot.Sum, nil)
 	err = table.Generate()
 	if err != nil {
 		return err

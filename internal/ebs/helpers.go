@@ -73,7 +73,7 @@ func groupEBSTimeCardsByMonth(csvData [][]string) ([][]interface{}, error) {
 				return nil, err
 			}
 			if monthHours > 0 || nextMonthHours > 0 {
-				tam.AddHours(parseProjectID(record[9]), record[10], month, monthHours, nextMonthHours)
+				tam.AddHours(parseProjectID(record[9]), record[10], "", month, monthHours, nextMonthHours)
 			}
 		}
 	}
@@ -109,14 +109,15 @@ func groupEBSTimeCardsByMonth(csvData [][]string) ([][]interface{}, error) {
 // record[3]=month (yyyy-mm)
 // record[14]=project
 // record[21]=cost
-// record[28]=type
+// record[26]=type
 // record[32]=employee
 // record[40]=hours
 // -->
 // record[0]=employee
 // record[1]=project
-// record[2-13]=hours
-// record[14-25]=cost
+// record[2]=category
+// record[3-14]=hours
+// record[15-26]=cost
 
 func filterBudgetPivotData(csvData [][]string) ([][]interface{}, error) {
 	tams := &utils.Vector[timeAndMaterial]{ID: func(element timeAndMaterial) string { return element.employee }}
@@ -143,42 +144,43 @@ func filterBudgetPivotData(csvData [][]string) ([][]interface{}, error) {
 				return nil, err
 			}
 			if monthHours > 0 || monthCost > 0 {
-				tam.AddHours(record[14], "", month, monthHours, 0)
-				tam.AddCosts(record[14], month, monthCost)
+				tam.AddHours(record[14], "", record[26], month, monthHours, 0)
+				tam.AddCosts(record[14], record[26], month, monthCost)
 			}
 		}
 	}
 	var rawData [][]interface{}
 	for _, tam := range tams.GetAll() {
 		for k1, v1 := range tam.projects {
-			record := make([]interface{}, 26)
+			record := make([]interface{}, 27)
 			rawData = append(rawData, record)
 			record[0] = tam.employee
 			record[1] = k1
-			record[2] = v1.hours[""][0]
-			record[3] = v1.hours[""][1]
-			record[4] = v1.hours[""][2]
-			record[5] = v1.hours[""][3]
-			record[6] = v1.hours[""][4]
-			record[7] = v1.hours[""][5]
-			record[8] = v1.hours[""][6]
-			record[9] = v1.hours[""][7]
-			record[10] = v1.hours[""][8]
-			record[11] = v1.hours[""][9]
-			record[12] = v1.hours[""][10]
-			record[13] = v1.hours[""][11]
-			record[14] = v1.costs[0]
-			record[15] = v1.costs[1]
-			record[16] = v1.costs[2]
-			record[17] = v1.costs[3]
-			record[18] = v1.costs[4]
-			record[19] = v1.costs[5]
-			record[20] = v1.costs[6]
-			record[21] = v1.costs[7]
-			record[22] = v1.costs[8]
-			record[23] = v1.costs[9]
-			record[24] = v1.costs[10]
-			record[25] = v1.costs[11]
+			record[2] = v1.category
+			record[3] = v1.hours[""][0]
+			record[4] = v1.hours[""][1]
+			record[5] = v1.hours[""][2]
+			record[6] = v1.hours[""][3]
+			record[7] = v1.hours[""][4]
+			record[8] = v1.hours[""][5]
+			record[9] = v1.hours[""][6]
+			record[10] = v1.hours[""][7]
+			record[11] = v1.hours[""][8]
+			record[12] = v1.hours[""][9]
+			record[13] = v1.hours[""][10]
+			record[14] = v1.hours[""][11]
+			record[15] = v1.costs[0]
+			record[16] = v1.costs[1]
+			record[17] = v1.costs[2]
+			record[18] = v1.costs[3]
+			record[19] = v1.costs[4]
+			record[20] = v1.costs[5]
+			record[21] = v1.costs[6]
+			record[22] = v1.costs[7]
+			record[23] = v1.costs[8]
+			record[24] = v1.costs[9]
+			record[25] = v1.costs[10]
+			record[26] = v1.costs[11]
 		}
 	}
 	return rawData, nil
