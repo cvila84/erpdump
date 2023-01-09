@@ -48,7 +48,9 @@ func GenerateFromFinanceExport(csvData string, csvTable string) error {
 	// record[2-13]=hours
 	// record[14-25]=cost
 	table := pivot.NewFloatTable(pivotData).
-		StandardRow(0)
+		StandardRow(0).
+		StandardColumn(1).
+		Values([]int{2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13}, pivot.YearlyHours, pivot.Sum, nil)
 	err = table.Generate()
 	if err != nil {
 		return err

@@ -132,10 +132,12 @@ func filterBudgetPivotData(csvData [][]string) ([][]interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
+			record[40] = strings.Replace(record[40], ",", ".", 1)
 			monthHours, err := strconv.ParseFloat(record[40], 32)
 			if err != nil {
 				return nil, err
 			}
+			record[21] = strings.Replace(record[21], ",", ".", 1)
 			monthCost, err := strconv.ParseFloat(record[21], 32)
 			if err != nil {
 				return nil, err
