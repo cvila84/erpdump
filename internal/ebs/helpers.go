@@ -71,7 +71,7 @@ func groupEBSTimeCardsByMonth(csvData [][]string) ([][]interface{}, error) {
 		}
 		if monthHours == 0 && nextMonthHours == 0 {
 			fmt.Printf("WARNING: no computed hours for entry %v\n", record)
-			break
+			continue
 		}
 		tam, ok := tams[project]
 		if !ok {
@@ -149,15 +149,15 @@ func filterBudgetPivotData(csvData [][]string) ([][]interface{}, error) {
 		monthCost = -monthCost
 		if monthHours == 0 && monthCost == 0 {
 			fmt.Printf("WARNING: no computed hours nor costs for entry %v\n", record)
-			break
+			continue
 		}
 		tam, ok := tams[project]
 		if !ok {
 			tam = &timeAndMaterial{}
 			tams[project] = tam
 		}
-		category := strings.ToUpper(strings.TrimSpace(record[26]))
-		if category == "workload" {
+		category := strings.TrimSpace(record[26])
+		if strings.ToUpper(category) == "WORKLOAD" {
 			tam.AddWorkload("", employee, "", month, monthHours, 0, monthCost)
 		} else {
 			tam.AddCosts("", category, month, monthCost)
