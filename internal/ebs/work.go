@@ -5,56 +5,68 @@ import (
 	"strconv"
 )
 
-type projectTAM struct {
-	category string
-	hours    map[string][]float64
-	costs    []float64
+type tamWorkload struct {
+	manager string
+	hours   []float64
+	costs   []float64
+}
+
+type tamEntry struct {
+	workload map[string]*tamWorkload
+	others   map[string][]float64
 }
 
 type timeAndMaterial struct {
-	employee string
-	manager  string
-	projects map[string]*projectTAM
+	entries map[string]*tamEntry
 }
 
-func (t *timeAndMaterial) AddHours(projectName, taskName, category string, month int, hoursInMonth, hoursInNextMonth float64) {
-	if t.projects == nil {
-		t.projects = make(map[string]*projectTAM)
+func (t *timeAndMaterial) AddWorkload(taskName, employee, manager string, month int, hoursInMonth, hoursInNextMonth, costsInMonth float64) {
+	if t.entries == nil {
+		t.entries = make(map[string]*tamEntry)
 	}
-	project, ok := t.projects[projectName]
+	entry, ok := t.entries[taskName]
 	if !ok {
-		project = &projectTAM{
-			category: category,
-			hours:    make(map[string][]float64),
-			costs:    make([]float64, 12),
+		entry = &tamEntry{
+			workload: make(map[string]*tamWorkload),
 		}
-		t.projects[projectName] = project
+		t.entries[taskName] = entry
 	}
-	taskTime, ok := project.hours[taskName]
+	workload, ok := entry.workload[employee]
 	if !ok {
-		taskTime = make([]float64, 12)
-		project.hours[taskName] = taskTime
+		workload = &tamWorkload{
+			manager: manager,
+			hours:   make([]float64, 12),
+			costs:   make([]float64, 12),
+		}
+		entry.workload[employee] = workload
 	}
-	taskTime[month-1] += hoursInMonth
+	workload.hours[month-1] += hoursInMonth
 	if hoursInNextMonth > 0 {
-		taskTime[month] += hoursInNextMonth
+		workload.hours[month] += hoursInNextMonth
 	}
+	workload.costs[month-1] += costsInMonth
 }
 
-func (t *timeAndMaterial) AddCosts(projectName, category string, month int, costsInMonth float64) {
-	if t.projects == nil {
-		t.projects = make(map[string]*projectTAM)
+func (t *timeAndMaterial) AddCosts(taskName, category string, month int, costsInMonth float64) {
+	if t.entries == nil {
+		t.entries = make(map[string]*tamEntry)
 	}
-	project, ok := t.projects[projectName]
+	entry, ok := t.entries[taskName]
 	if !ok {
-		project = &projectTAM{
-			category: category,
-			hours:    make(map[string][]float64),
-			costs:    make([]float64, 12),
+		entry = &tamEntry{
+			workload: make(map[string]*tamWorkload),
 		}
-		t.projects[projectName] = project
+		t.entries[taskName] = entry
 	}
-	project.costs[month-1] += costsInMonth
+	if entry.others == nil {
+		entry.others = make(map[string][]float64)
+	}
+	costs, ok := entry.others[category]
+	if !ok {
+		costs = make([]float64, 12)
+		entry.others[category] = costs
+	}
+	costs[month-1] += costsInMonth
 }
 
 func weeklyHours(record []string) ([]float64, error) {

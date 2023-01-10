@@ -2,7 +2,6 @@ package pivot
 
 import (
 	"fmt"
-	"strings"
 )
 
 func valueString(v interface{}) string {
@@ -13,17 +12,6 @@ func valueString(v interface{}) string {
 		return fmt.Sprintf("%.2f", v)
 	}
 	return "#"
-}
-
-func parentLabel(label string) string {
-	if label == "" {
-		return ""
-	}
-	idx := strings.LastIndex(label, "/")
-	if idx <= 0 {
-		return ""
-	}
-	return label[0:idx]
 }
 
 func add[T headerTypes | valueTypes](elements []T, element interface{}) ([]T, error) {

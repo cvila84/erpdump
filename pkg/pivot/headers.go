@@ -1,5 +1,11 @@
 package pivot
 
+import "strings"
+
+const (
+	HEADER_SEPARATOR string = " | "
+)
+
 type headers struct {
 	parent      *headers
 	label       string
@@ -21,7 +27,7 @@ func newRootHeaders(defaultSort Sort) *headers {
 func newChild(parent *headers, label string) *headers {
 	var childLabel string
 	if len(parent.label) > 0 {
-		childLabel = parent.label + "/" + label
+		childLabel = parent.label + HEADER_SEPARATOR + label
 	} else {
 		childLabel = label
 	}
@@ -77,4 +83,15 @@ func (h *headers) labels(recursive bool, self bool) []string {
 		labels = append(labels, h.label)
 	}
 	return labels
+}
+
+func parentHeaderLabel(label string) string {
+	if label == "" {
+		return ""
+	}
+	idx := strings.LastIndex(label, HEADER_SEPARATOR)
+	if idx <= 0 {
+		return ""
+	}
+	return label[0:idx]
 }

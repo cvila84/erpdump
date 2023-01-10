@@ -107,9 +107,9 @@ func (t *Table[T]) updateSums(rowLabel string, columnLabel string, record []inte
 					return err
 				}
 			}
-			sumRowLabel = parentLabel(sumRowLabel)
+			sumRowLabel = parentHeaderLabel(sumRowLabel)
 		}
-		sumColumnLabel = parentLabel(sumColumnLabel)
+		sumColumnLabel = parentHeaderLabel(sumColumnLabel)
 	}
 	return nil
 }
@@ -130,9 +130,15 @@ func (t *Table[T]) Generate() error {
 		if err != nil {
 			return err
 		}
+		if len(rowLabel) == 0 {
+			return fmt.Errorf("empty row labels are not supported")
+		}
 		columnLabel, err = walk(t.columnHeaders, t.columnSeries, record)
 		if err != nil {
 			return err
+		}
+		if len(columnLabel) == 0 {
+			return fmt.Errorf("empty row labels are not supported")
 		}
 		err = t.updateCell(rowLabel, columnLabel, record)
 		if err != nil {

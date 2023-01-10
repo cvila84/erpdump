@@ -6,17 +6,17 @@ import (
 )
 
 func TestTable(t *testing.T) {
-	if parentLabel("") != "" {
-		t.Fatalf("parentLabel(\"\")=%s!=\"\"", parentLabel(""))
+	if parentHeaderLabel("") != "" {
+		t.Fatalf("parentHeaderLabel(\"\")=%s!=\"\"", parentHeaderLabel(""))
 	}
-	if parentLabel("A1") != "" {
-		t.Fatalf("parentLabel(\"A1\")=%s!=\"\"", parentLabel("A1"))
+	if parentHeaderLabel("A1") != "" {
+		t.Fatalf("parentHeaderLabel(\"A1\")=%s!=\"\"", parentHeaderLabel("A1"))
 	}
-	if parentLabel("A1/B1") != "A1" {
-		t.Fatalf("parentLabel(\"A1/B1\")=%s!=\"A1\"", parentLabel("A1/B1"))
+	if parentHeaderLabel("A1/B1") != "A1" {
+		t.Fatalf("parentHeaderLabel(\"A1/B1\")=%s!=\"A1\"", parentHeaderLabel("A1/B1"))
 	}
-	if parentLabel("A1/B1/C1") != "A1/B1" {
-		t.Fatalf("parentLabel(\"A1/B1/C1\")=%s!=\"A1/B1\"", parentLabel("A1/B1/C1"))
+	if parentHeaderLabel("A1/B1/C1") != "A1/B1" {
+		t.Fatalf("parentHeaderLabel(\"A1/B1/C1\")=%s!=\"A1/B1\"", parentHeaderLabel("A1/B1/C1"))
 	}
 	rawData := [][]interface{}{
 		{"A1", "B1", "C1", "D1", 4},

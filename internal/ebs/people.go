@@ -461,7 +461,7 @@ func uniquePeople(index int, peopleLists ...[][]string) []string {
 				for _, p := range result {
 					if l2[index] == p {
 						present = true
-						fmt.Printf("WARNING: same key detected: %q\n", p)
+						fmt.Printf("WARNING: duplicated people detected: %q\n", p)
 					}
 				}
 				if !present {
