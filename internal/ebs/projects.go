@@ -1,9 +1,5 @@
 package ebs
 
-import (
-	"regexp"
-)
-
 var otaProjects = []string{
 	"R1R29750",
 	"R1R29751",
@@ -20,15 +16,4 @@ var functionalProjects = []string{
 	"RDX0000T",
 	"RDX000PT",
 	"X0000T",
-}
-
-func parseProjectID(projectName string) string {
-	r, _ := regexp.Compile(".*\\((.*)\\)$")
-	if r != nil {
-		g := r.FindStringSubmatch(projectName)
-		if len(g) > 1 {
-			return g[1]
-		}
-	}
-	return "N/A"
 }

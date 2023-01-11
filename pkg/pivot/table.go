@@ -12,7 +12,7 @@ type Filter func(element interface{}) bool
 
 type Sort func(elements []string) []string
 
-type Compute[T headerTypes | valueTypes] func(elements []T) T
+type Compute[T headerTypes | valueTypes] func(record []interface{}) (T, error)
 
 type Action int
 
@@ -42,31 +42,17 @@ type Table[T valueTypes] struct {
 	valueSeries   []series[T]
 }
 
-func NewIntTable(data [][]interface{}) *Table[int] {
-	return &Table[int]{
+func NewTable[T valueTypes](data [][]interface{}) *Table[T] {
+	return &Table[T]{
 		data:          data,
 		filteredData:  nil,
-		pivot:         make(map[string]map[string][]int),
+		pivot:         make(map[string]map[string][]T),
 		filters:       make(map[int]Filter),
 		rowHeaders:    newRootHeaders(nil),
 		columnHeaders: newRootHeaders(nil),
 		rowSeries:     make([]series[string], 0),
 		columnSeries:  make([]series[string], 0),
-		valueSeries:   make([]series[int], 0),
-	}
-}
-
-func NewFloatTable(data [][]interface{}) *Table[float64] {
-	return &Table[float64]{
-		data:          data,
-		filteredData:  nil,
-		pivot:         make(map[string]map[string][]float64),
-		filters:       make(map[int]Filter),
-		rowHeaders:    newRootHeaders(nil),
-		columnHeaders: newRootHeaders(nil),
-		rowSeries:     make([]series[string], 0),
-		columnSeries:  make([]series[string], 0),
-		valueSeries:   make([]series[float64], 0),
+		valueSeries:   make([]series[T], 0),
 	}
 }
 
@@ -177,7 +163,7 @@ func (t *Table[T]) ToCSV() string {
 					var sbv strings.Builder
 					sbv.WriteString("[ ")
 					for j := 0; j < len(v); j++ {
-						sbv.WriteString(valueString(v[i]))
+						sbv.WriteString(valueString(v[j]))
 						if j != len(v)-1 {
 							sbv.WriteString(", ")
 						}

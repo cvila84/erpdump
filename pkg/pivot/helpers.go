@@ -11,32 +11,27 @@ func valueString(v interface{}) string {
 	case float64:
 		return fmt.Sprintf("%.2f", v)
 	}
-	return "#"
-}
-
-func add[T headerTypes | valueTypes](elements []T, element interface{}) ([]T, error) {
-	str, ok := element.(T)
-	if !ok {
-		return elements, fmt.Errorf("internal error during value parsing, expected %T", *new(T))
-	}
-	elements = append(elements, str)
-	return elements, nil
+	return fmt.Sprintf("%v", v)
 }
 
 func compute[T headerTypes | valueTypes](serie series[T], record []interface{}) (T, error) {
 	var value T
-	var elements []T
+	var elements []interface{}
 	for _, i := range serie.indexes {
-		var err error
-		elements, err = add(elements, record[i])
-		if err != nil {
-			return *new(T), err
-		}
+		elements = append(elements, record[i])
 	}
 	if serie.compute != nil {
-		value = serie.compute(elements)
+		var err error
+		value, err = serie.compute(elements)
+		if err != nil {
+			return *new(T), fmt.Errorf("while computing for %v: %w", elements, err)
+		}
 	} else {
-		value = elements[0]
+		var ok bool
+		value, ok = elements[0].(T)
+		if !ok {
+			return *new(T), fmt.Errorf("invalid type %T for element %s", elements[0], elements[0])
+		}
 	}
 	return value, nil
 }

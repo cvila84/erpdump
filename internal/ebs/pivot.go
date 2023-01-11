@@ -11,18 +11,24 @@ func GenerateFromEBSExport(csvDataFile, csvTablePath, csvTablePrefix string) err
 	if err != nil {
 		return fmt.Errorf("while reading %s: %w", csvDataFile, err)
 	}
+	// record[0]=manager
+	// record[1]=employee
+	// record[6]=hours
+	// record[9]=project
+	// record[10]=task
+	// record[12-17]=hours(weekly)
 
-	pivotData, err := groupEBSTimeCardsByMonth(rawData[1:])
+	pivotData, err := groupEBSTimeCardsByMonth(rawData[1:], false)
 	if err != nil {
 		return fmt.Errorf("while processing raw csv data: %w", err)
 	}
-	// record[0]=employee
-	// record[1]=manager
-	// record[2]=project
-	// record[3]=task
+	// record[0]=project
+	// record[1]=task
+	// record[2]=employee
+	// record[3]=manager
 	// record[4-15]=hours(monthly)
 
-	table := pivot.NewFloatTable(pivotData).
+	table := pivot.NewTable[float64](pivotData).
 		//Filter(1, table.In(otaManagers)).
 		Filter(2, pivot.In(otaProjects)).
 		//Row([]int{0}, table.Group([][]string{OtaPeople}, []string{"OTA"}, "External"), nil, table.AlphaSort).
@@ -30,7 +36,7 @@ func GenerateFromEBSExport(csvDataFile, csvTablePath, csvTablePrefix string) err
 		Column([]int{2}, pivot.Group([][]string{otaProjects, functionalProjects}, []string{"OTA", "Functional"}, "Other"), nil, pivot.AlphaSort).
 		StandardColumn(2).
 		//StandardColumn(3).
-		Values([]int{4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15}, pivot.YearlyHours, pivot.Sum, nil)
+		Values([]int{4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15}, pivot.SumFloats, pivot.Sum, nil)
 	err = table.Generate()
 	if err != nil {
 		return err
@@ -39,48 +45,45 @@ func GenerateFromEBSExport(csvDataFile, csvTablePath, csvTablePrefix string) err
 }
 
 func GenerateFromFinanceExport(csvDataFiles []string, csvTablePath, csvTablePrefix string) error {
-	var allRawData [][]string
+	var allRawData [][]interface{}
 	for _, csvDataFile := range csvDataFiles {
 		rawData, err := readCsvFile(csvDataFile)
 		if err != nil {
 			return fmt.Errorf("while reading %s: %w", csvDataFile, err)
 		}
-		allRawData = append(allRawData, rawData[1:]...)
+		for i, record := range rawData {
+			if i > 0 {
+				rawRecord := make([]interface{}, len(record))
+				for j := 0; j < len(record); j++ {
+					rawRecord[j] = record[j]
+				}
+				allRawData = append(allRawData, rawRecord)
+			}
+		}
 	}
+	// record[3]=month (yyyy-mm)
+	// record[14]=project
+	// record[21]=cost
+	// record[26]=category
+	// record[32]=employee
+	// record[40]=hours
 
-	pivotData, err := filterBudgetPivotData(allRawData)
-	if err != nil {
-		return fmt.Errorf("while processing raw csv data: %w", err)
-	}
-	// record[0]=employee
-	// record[1]=project
-	// record[2]=category
-	// record[3-14]=hours
-	// record[15-26]=cost
-
-	table := pivot.NewFloatTable(pivotData).
-		Row([]int{1}, nil, nil, pivot.AlphaSort).
-		Row([]int{0}, nil, nil, pivot.AlphaSort).
-		Column([]int{1, 0}, projectGroups(false), nil, pivot.AlphaSort).
-		Values([]int{3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14}, pivot.YearlyHours, pivot.Sum, nil)
-	err = table.Generate()
+	table := pivot.NewTable[float64](allRawData).
+		Row([]int{14}, nil, nil, pivot.AlphaSort).
+		StandardRow(26).
+		Row([]int{32}, nil, nil, pivot.AlphaSort).
+		Column([]int{3}, quaterlySplit, nil, pivot.AlphaSort).
+		Column([]int{14, 32}, projectGroups(false), nil, pivot.AlphaSort).
+		Values([]int{40}, float, pivot.Sum, nil).
+		Values([]int{21}, float, pivot.Sum, nil).
+		Values([]int{40, 21}, dailyRate, pivot.Sum, nil)
+	err := table.Generate()
 	if err != nil {
 		return err
 	}
-	err = saveCsvFile(csvTablePath+string(filepath.Separator)+csvTablePrefix+"h.csv", table.ToCSV())
+	err = saveCsvFile(csvTablePath+string(filepath.Separator)+csvTablePrefix+".csv", table.ToCSV())
 	if err != nil {
 		return err
 	}
-
-	table = pivot.NewFloatTable(pivotData).
-		Row([]int{1}, nil, nil, pivot.AlphaSort).
-		StandardRow(2).
-		Row([]int{0}, nil, nil, pivot.AlphaSort).
-		Column([]int{1, 0}, projectGroups(false), nil, pivot.AlphaSort).
-		Values([]int{15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26}, pivot.YearlyHours, pivot.Sum, nil)
-	err = table.Generate()
-	if err != nil {
-		return err
-	}
-	return saveCsvFile(csvTablePath+string(filepath.Separator)+csvTablePrefix+"c.csv", table.ToCSV())
+	return nil
 }

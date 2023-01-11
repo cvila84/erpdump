@@ -4,12 +4,137 @@ import (
 	"bufio"
 	"encoding/csv"
 	"fmt"
+	"github.com/cvila84/erpdump/pkg/pivot"
 	"github.com/cvila84/erpdump/pkg/utils"
 	"golang.org/x/text/encoding/charmap"
 	"os"
+	"regexp"
 	"strconv"
 	"strings"
 )
+
+var float pivot.Compute[float64] = func(elements []interface{}) (float64, error) {
+	return toFloat(elements[0])
+}
+
+var monthlySplit pivot.Compute[string] = func(elements []interface{}) (string, error) {
+	e, ok := elements[0].(string)
+	if !ok {
+		return "", fmt.Errorf("invalid type %T for element %s", elements[0], elements[0])
+	}
+	month, _, err := utils.ParseDateYYYYsMM(e)
+	if err != nil {
+		return "", fmt.Errorf("invalid YYYY-MM format for element %s", e)
+	}
+	return utils.Month(month), nil
+}
+
+var quaterlySplit pivot.Compute[string] = func(elements []interface{}) (string, error) {
+	e, ok := elements[0].(string)
+	if !ok {
+		return "", fmt.Errorf("invalid type %T for element %s", elements[0], elements[0])
+	}
+	month, _, err := utils.ParseDateYYYYsMM(e)
+	if err != nil {
+		return "", fmt.Errorf("invalid YYYY-MM format for element %s", e)
+	}
+	return utils.Quarter(month), nil
+}
+
+var dailyRate pivot.Compute[float64] = func(elements []interface{}) (float64, error) {
+	hours, err := toFloat(elements[0])
+	if err != nil {
+		return 0, err
+	}
+	cost, err := toFloat(elements[1])
+	if err != nil {
+		return 0, err
+	}
+	if hours == 0 {
+		return 0, nil
+	} else {
+		return -8 * cost / hours, nil
+	}
+}
+
+var projectGroups = func(prefixProject bool) pivot.Compute[string] {
+	return func(elements []interface{}) (string, error) {
+		e, ok := elements[0].(string)
+		if !ok {
+			return "", fmt.Errorf("invalid type %T for element %s", elements[0], elements[0])
+		}
+		var prefix string
+		if prefixProject {
+			prefix = e + "-"
+		}
+		team, ok := projectsTeam[e]
+		if ok {
+			for _, p := range team.budget {
+				if p == elements[1] {
+					return prefix + "Budget", nil
+				}
+			}
+			for _, p := range team.extension {
+				if p == elements[1] {
+					return prefix + "Ext", nil
+				}
+			}
+			for _, p := range team.other {
+				if p == elements[1] {
+					return prefix + "Other", nil
+				}
+			}
+		}
+		return prefix + "Unknown", nil
+	}
+}
+
+func uniquePeople(verbose bool, index int, peopleLists ...[][]string) []string {
+	var result []string
+	for _, l1 := range peopleLists {
+		for _, l2 := range l1 {
+			if len(l2[index]) > 0 {
+				present := false
+				for _, p := range result {
+					if l2[index] == p {
+						present = true
+						if verbose {
+							fmt.Printf("WARNING: duplicated people detected: %q\n", p)
+						}
+					}
+				}
+				if !present {
+					result = append(result, l2[index])
+				}
+			}
+		}
+	}
+	return result
+}
+
+func toFloat(element interface{}) (float64, error) {
+	e, ok := element.(string)
+	if !ok {
+		return 0, fmt.Errorf("invalid type %T for element %s", element, element)
+	}
+	e = strings.Replace(e, ",", ".", 1)
+	result, err := strconv.ParseFloat(e, 32)
+	if err != nil {
+		return 0, fmt.Errorf("invalid numeric format for element %s", e)
+	}
+	return result, nil
+}
+
+func parseProjectID(projectName string) string {
+	r, _ := regexp.Compile(".*\\((.*)\\)$")
+	if r != nil {
+		g := r.FindStringSubmatch(projectName)
+		if len(g) > 1 {
+			return g[1]
+		}
+	}
+	return "N/A"
+}
 
 func readCsvFile(filePath string) ([][]string, error) {
 	f, err := os.Open(filePath)
@@ -55,12 +180,12 @@ func saveCsvFile(filePath string, csvData string) error {
 // record[10]=task
 // record[12-17]=hours(weekly)
 // -->
-// record[0]=employee
-// record[1]=manager
-// record[2]=project
-// record[3]=task
+// record[0]=project
+// record[1]=task
+// record[2]=employee
+// record[3]=manager
 // record[4-15]=hours(monthly)
-func groupEBSTimeCardsByMonth(csvData [][]string) ([][]interface{}, error) {
+func groupEBSTimeCardsByMonth(csvData [][]string, verbose bool) ([][]interface{}, error) {
 	tams := map[string]*timeAndMaterial{}
 	for _, record := range csvData {
 		project := parseProjectID(record[9])
@@ -70,7 +195,9 @@ func groupEBSTimeCardsByMonth(csvData [][]string) ([][]interface{}, error) {
 			return nil, fmt.Errorf("cannot parse week hour fields %v: %w", record, err)
 		}
 		if monthHours == 0 && nextMonthHours == 0 {
-			fmt.Printf("WARNING: no computed hours for entry %v\n", record)
+			if verbose {
+				fmt.Printf("WARNING: no computed hours for entry %v\n", record)
+			}
 			continue
 		}
 		tam, ok := tams[project]
@@ -83,10 +210,10 @@ func groupEBSTimeCardsByMonth(csvData [][]string) ([][]interface{}, error) {
 
 	var fillRecord = func(employee, manager, project, task string, hours []float64) []interface{} {
 		record := make([]interface{}, 16)
-		record[0] = employee
-		record[1] = manager
-		record[2] = project
-		record[3] = task
+		record[0] = project
+		record[1] = task
+		record[2] = employee
+		record[3] = manager
 		record[4] = hours[0]
 		record[5] = hours[1]
 		record[6] = hours[2]
@@ -127,7 +254,7 @@ func groupEBSTimeCardsByMonth(csvData [][]string) ([][]interface{}, error) {
 // record[3-14]=hours
 // record[15-26]=cost
 
-func filterBudgetPivotData(csvData [][]string) ([][]interface{}, error) {
+func filterBudgetPivotData(csvData [][]string, verbose bool) ([][]interface{}, error) {
 	tams := map[string]*timeAndMaterial{}
 	for _, record := range csvData {
 		project := strings.TrimSpace(record[14])
@@ -148,7 +275,9 @@ func filterBudgetPivotData(csvData [][]string) ([][]interface{}, error) {
 		}
 		monthCost = -monthCost
 		if monthHours == 0 && monthCost == 0 {
-			fmt.Printf("WARNING: no computed hours nor costs for entry %v\n", record)
+			if verbose {
+				fmt.Printf("WARNING: no computed hours nor costs for entry %v\n", record)
+			}
 			continue
 		}
 		tam, ok := tams[project]

@@ -1,6 +1,7 @@
 package pivot
 
 import (
+	"fmt"
 	"sort"
 	"strings"
 )
@@ -22,35 +23,47 @@ var ReverseAlphaSort Sort = func(elements []string) []string {
 }
 
 var Group = func(groups [][]string, groupLabels []string, noneLabel string) Compute[string] {
-	return func(elements []string) string {
+	return func(elements []interface{}) (string, error) {
 		for i, group := range groups {
-			for _, e := range group {
-				if elements[0] == e {
-					return groupLabels[i]
+			for _, groupElement := range group {
+				e, ok := elements[0].(string)
+				if !ok {
+					return "", fmt.Errorf("invalid type %T for element %s", elements[0], elements[0])
+				}
+				if e == groupElement {
+					return groupLabels[i], nil
 				}
 			}
 		}
-		return noneLabel
+		return noneLabel, nil
 	}
 }
 
-var YearlyHours Compute[float64] = func(elements []float64) float64 {
+var SumFloats Compute[float64] = func(elements []interface{}) (float64, error) {
 	var result float64
 	for _, element := range elements {
-		result += element
+		f, ok := element.(float64)
+		if !ok {
+			return 0, fmt.Errorf("invalid type %T for element %s", element, element)
+		}
+		result += f
 	}
-	return result
+	return result, nil
 }
 
-var QuaterlyHours = func(quarter int) Compute[float64] {
-	return func(elements []float64) float64 {
+var PartialSumFloats = func(sumGroup, groupSize int) Compute[float64] {
+	return func(elements []interface{}) (float64, error) {
 		var result float64
 		for i, element := range elements {
-			if i >= 3*(quarter-1) && i < 3*quarter {
-				result += element
+			e, ok := element.(float64)
+			if !ok {
+				return 0, fmt.Errorf("invalid type %T for element %s", element, element)
+			}
+			if i >= groupSize*(sumGroup-1) && i < groupSize*sumGroup {
+				result += e
 			}
 		}
-		return result
+		return result, nil
 	}
 }
 

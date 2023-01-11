@@ -5,6 +5,66 @@ import (
 	"time"
 )
 
+func Quarter(month int) string {
+	switch month {
+	case 1:
+		return "Q1"
+	case 2:
+		return "Q1"
+	case 3:
+		return "Q1"
+	case 4:
+		return "Q2"
+	case 5:
+		return "Q2"
+	case 6:
+		return "Q2"
+	case 7:
+		return "Q3"
+	case 8:
+		return "Q3"
+	case 9:
+		return "Q3"
+	case 10:
+		return "Q4"
+	case 11:
+		return "Q4"
+	case 12:
+		return "Q4"
+	}
+	return "Q?" + strconv.Itoa(month)
+}
+
+func Month(month int) string {
+	switch month {
+	case 1:
+		return "Jan"
+	case 2:
+		return "Feb"
+	case 3:
+		return "Mar"
+	case 4:
+		return "Apr"
+	case 5:
+		return "May"
+	case 6:
+		return "Jun"
+	case 7:
+		return "Jul"
+	case 8:
+		return "Aug"
+	case 9:
+		return "Sep"
+	case 10:
+		return "Oct"
+	case 11:
+		return "Nov"
+	case 12:
+		return "Dec"
+	}
+	return "M?" + strconv.Itoa(month)
+}
+
 func ParseDateYYYYsMM(date string) (int, int, error) {
 	month, err := strconv.Atoi(date[5:7])
 	if err != nil {
