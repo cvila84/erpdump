@@ -25,9 +25,9 @@ const (
 type series[T headerTypes | valueTypes] struct {
 	indexes []int
 	filter  Filter
-	sort    Sort
 	compute Compute[T]
 	action  Action
+	sort    Sort
 }
 
 type Table[T valueTypes] struct {
@@ -68,21 +68,16 @@ func (t *Table[T]) updateCell(rowLabel string, columnLabel string, record []inte
 			rc = make([]T, len(t.valueSeries))
 			rr[columnLabel] = rc
 		}
-		switch serie.action {
-		case Count:
-			rc[is]++
-		case Sum:
-			value, err := compute(serie, record)
-			if err != nil {
-				return err
-			}
-			rc[is] += value
+		value, err := compute(rc, serie, record)
+		if err != nil {
+			return err
 		}
+		rc[is] = value
 	}
 	return nil
 }
 
-func (t *Table[T]) updateSums(rowLabel string, columnLabel string, record []interface{}) error {
+func (t *Table[T]) updateCrossCells(rowLabel string, columnLabel string, record []interface{}) error {
 	sumColumnLabel := columnLabel
 	for i := 0; i < len(t.columnSeries)+1; i++ {
 		sumRowLabel := rowLabel
@@ -130,7 +125,7 @@ func (t *Table[T]) Generate() error {
 		if err != nil {
 			return err
 		}
-		err = t.updateSums(rowLabel, columnLabel, record)
+		err = t.updateCrossCells(rowLabel, columnLabel, record)
 		if err != nil {
 			return err
 		}
@@ -209,7 +204,7 @@ func (t *Table[T]) StandardColumn(index int) *Table[T] {
 	return t.Column([]int{index}, nil, nil, nil)
 }
 
-func (t *Table[T]) Column(indexes []int, compute Compute[string], filter Filter, sort Sort) *Table[T] {
+func (t *Table[T]) Column(indexes []int, filter Filter, compute Compute[string], sort Sort) *Table[T] {
 	t.columnSeries = append(t.columnSeries, series[string]{
 		indexes: indexes,
 		filter:  filter,
@@ -221,10 +216,10 @@ func (t *Table[T]) Column(indexes []int, compute Compute[string], filter Filter,
 }
 
 func (t *Table[T]) StandardValues(index int, action Action) *Table[T] {
-	return t.Values([]int{index}, nil, action, nil)
+	return t.Values([]int{index}, nil, nil, action)
 }
 
-func (t *Table[T]) Values(indexes []int, compute Compute[T], action Action, filter Filter) *Table[T] {
+func (t *Table[T]) Values(indexes []int, filter Filter, compute Compute[T], action Action) *Table[T] {
 	t.valueSeries = append(t.valueSeries, series[T]{
 		indexes: indexes,
 		filter:  filter,

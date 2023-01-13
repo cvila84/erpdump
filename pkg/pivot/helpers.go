@@ -14,23 +14,25 @@ func valueString(v interface{}) string {
 	return fmt.Sprintf("%v", v)
 }
 
-func compute[T headerTypes | valueTypes](serie series[T], record []interface{}) (T, error) {
+func compute[T headerTypes | valueTypes](t []T, serie series[T], record []interface{}) (T, error) {
 	var value T
-	var elements []interface{}
+	var previousElements []T
+	var computeElements []interface{}
 	for _, i := range serie.indexes {
-		elements = append(elements, record[i])
+		previousElements = append(previousElements, t[i])
+		computeElements = append(computeElements, record[i])
 	}
 	if serie.compute != nil {
 		var err error
-		value, err = serie.compute(elements)
+		value, err = serie.compute(computeElements)
 		if err != nil {
-			return *new(T), fmt.Errorf("while computing for %v: %w", elements, err)
+			return *new(T), fmt.Errorf("while computing for %v: %w", computeElements, err)
 		}
 	} else {
 		var ok bool
-		value, ok = elements[0].(T)
+		value, ok = computeElements[0].(T)
 		if !ok {
-			return *new(T), fmt.Errorf("invalid type %T for element %s", elements[0], elements[0])
+			return *new(T), fmt.Errorf("invalid type %T for element %s", computeElements[0], computeElements[0])
 		}
 	}
 	return value, nil
