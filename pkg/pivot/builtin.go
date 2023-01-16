@@ -3,6 +3,7 @@ package pivot
 import (
 	"fmt"
 	"sort"
+	"strconv"
 	"strings"
 )
 
@@ -28,7 +29,7 @@ var Group = func(groups [][]string, groupLabels []string, noneLabel string) Comp
 			for _, groupElement := range group {
 				e, ok := elements[0].(string)
 				if !ok {
-					return "", fmt.Errorf("invalid type %T for element %s", elements[0], elements[0])
+					return "", InvalidType(elements[0])
 				}
 				if e == groupElement {
 					return groupLabels[i], nil
@@ -44,7 +45,7 @@ var SumFloats Compute[float64] = func(elements []interface{}) (float64, error) {
 	for _, element := range elements {
 		f, ok := element.(float64)
 		if !ok {
-			return 0, fmt.Errorf("invalid type %T for element %s", element, element)
+			return 0, InvalidType(element)
 		}
 		result += f
 	}
@@ -57,7 +58,7 @@ var PartialSumFloats = func(sumGroup, groupSize int) Compute[float64] {
 		for i, element := range elements {
 			e, ok := element.(float64)
 			if !ok {
-				return 0, fmt.Errorf("invalid type %T for element %s", element, element)
+				return 0, InvalidType(element)
 			}
 			if i >= groupSize*(sumGroup-1) && i < groupSize*sumGroup {
 				result += e
@@ -76,4 +77,12 @@ var In = func(list []string) Filter {
 		}
 		return false
 	}
+}
+
+func Digits(n int) string {
+	return "%." + strconv.Itoa(n) + "f"
+}
+
+func InvalidType(element interface{}) error {
+	return fmt.Errorf("invalid type %T for element %q", element, element)
 }

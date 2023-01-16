@@ -9,7 +9,7 @@ import (
 func GenerateFromEBSExport(csvDataFile, csvTablePath, csvTablePrefix string) error {
 	rawData, err := readCsvFile(csvDataFile)
 	if err != nil {
-		return fmt.Errorf("while reading %s: %w", csvDataFile, err)
+		return fmt.Errorf("while reading %q: %w", csvDataFile, err)
 	}
 	// record[0]=manager
 	// record[1]=employee
@@ -28,7 +28,7 @@ func GenerateFromEBSExport(csvDataFile, csvTablePath, csvTablePrefix string) err
 	// record[3]=manager
 	// record[4-15]=hours(monthly)
 
-	table := pivot.NewTable[float64](pivotData).
+	table := pivot.NewTable(pivotData, false).
 		//Filter(1, table.In(otaManagers)).
 		Filter(2, pivot.In(otaProjects)).
 		//Row([]int{0}, table.Group([][]string{OtaPeople}, []string{"OTA"}, "External"), nil, table.AlphaSort).
@@ -36,7 +36,7 @@ func GenerateFromEBSExport(csvDataFile, csvTablePath, csvTablePrefix string) err
 		Column([]int{2}, nil, pivot.Group([][]string{otaProjects, functionalProjects}, []string{"OTA", "Functional"}, "Other"), pivot.AlphaSort).
 		StandardColumn(2).
 		//StandardColumn(3).
-		Values([]int{4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15}, false, pivot.SumFloats, pivot.Sum)
+		Values([]int{4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15}, pivot.SumFloats, pivot.Sum, pivot.Digits(1))
 	err = table.Generate()
 	if err != nil {
 		return err
@@ -46,13 +46,13 @@ func GenerateFromEBSExport(csvDataFile, csvTablePath, csvTablePrefix string) err
 
 func GenerateFromFinanceExport(csvDataFiles []string, csvTablePath, csvTablePrefix string) error {
 	var allRawData [][]interface{}
-	for _, csvDataFile := range csvDataFiles {
+	for i, csvDataFile := range csvDataFiles {
 		rawData, err := readCsvFile(csvDataFile)
 		if err != nil {
-			return fmt.Errorf("while reading %s: %w", csvDataFile, err)
+			return fmt.Errorf("while reading %q: %w", csvDataFile, err)
 		}
-		for i, record := range rawData {
-			if i > 0 {
+		for j, record := range rawData {
+			if i == 0 || j > 0 {
 				rawRecord := make([]interface{}, len(record))
 				for j := 0; j < len(record); j++ {
 					rawRecord[j] = record[j]
@@ -68,15 +68,15 @@ func GenerateFromFinanceExport(csvDataFiles []string, csvTablePath, csvTablePref
 	// record[32]=employee
 	// record[40]=hours
 
-	table := pivot.NewTable[float64](allRawData).
+	table := pivot.NewTable(allRawData, true).
 		Row([]int{14}, nil, nil, pivot.AlphaSort).
 		StandardRow(26).
 		Row([]int{32}, nil, nil, pivot.AlphaSort).
 		Column([]int{3}, nil, quaterlySplit, pivot.AlphaSort).
 		Column([]int{14, 32}, nil, projectGroups(false), pivot.AlphaSort).
-		Values([]int{40, 21}, true, dailyRate, pivot.Set).
-		Values([]int{40}, true, nil, pivot.Sum).
-		Values([]int{21}, true, nil, pivot.Sum)
+		Values([]int{40, 21}, dailyRate, pivot.Set, pivot.Digits(1)).
+		Values([]int{40}, nil, pivot.Sum, pivot.Digits(0)).
+		Values([]int{21}, nil, pivot.Sum, pivot.Digits(0))
 	err := table.Generate()
 	if err != nil {
 		return err

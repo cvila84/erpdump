@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"fmt"
 	"strconv"
 	"time"
 )
@@ -66,6 +67,9 @@ func Month(month int) string {
 }
 
 func ParseDateYYYYsMM(date string) (int, int, error) {
+	if len(date) != 7 {
+		return 0, 0, fmt.Errorf("incorrect length")
+	}
 	month, err := strconv.Atoi(date[5:7])
 	if err != nil {
 		return 0, 0, err
@@ -78,6 +82,9 @@ func ParseDateYYYYsMM(date string) (int, int, error) {
 }
 
 func ParseDateDDsMMMsYYYY(date string) (int, int, int, error) {
+	if len(date) != 11 {
+		return 0, 0, 0, fmt.Errorf("incorrect length")
+	}
 	day, err := strconv.Atoi(date[0:2])
 	if err != nil {
 		return 0, 0, 0, err

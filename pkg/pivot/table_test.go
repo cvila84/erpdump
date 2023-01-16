@@ -37,7 +37,7 @@ func TestTable(t *testing.T) {
 	// A2/B1             5       5
 	// A2/B1/C1          5       5
 	// Total     10      6       16
-	table := NewIntTable(rawData).
+	table := NewTable(rawData, false).
 		StandardRow(0).
 		StandardRow(1).
 		StandardRow(2).
@@ -48,7 +48,7 @@ func TestTable(t *testing.T) {
 		t.Fatalf("%s", err)
 	}
 	fmt.Println(table.ToCSV())
-	table = NewIntTable(rawData).
+	table = NewTable(rawData, false).
 		StandardRow(0).
 		StandardRow(1).
 		StandardColumn(2).

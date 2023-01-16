@@ -3,85 +3,110 @@ package pivot
 import (
 	"fmt"
 	"strconv"
+	"strings"
 )
 
-func valueString(v interface{}) string {
-	switch v.(type) {
+func toFloat(element interface{}) (float64, error) {
+	switch element.(type) {
 	case int:
-		return fmt.Sprintf("%d", v)
+		return float64(element.(int)), nil
 	case float64:
-		return fmt.Sprintf("%.2f", v)
-	}
-	return fmt.Sprintf("%v", v)
-}
-
-func bestEffortCast[T valueTypes](v interface{}) T {
-	switch v.(type) {
+		return element.(float64), nil
 	case string:
-		strconv.Atoi
-	case int:
+	default:
+		return 0, InvalidType(element)
 	}
+	es, _ := element.(string)
+	es = strings.Replace(es, ",", ".", 1)
+	result, err := strconv.ParseFloat(es, 32)
+	if err != nil {
+		return 0, fmt.Errorf("invalid numeric format for element %q", element)
+	}
+	return result, nil
 }
 
-func compute[T headerTypes | valueTypes](serie series[T], record []interface{}) (T, error) {
-	var value T
-	var elements []interface{}
-	for _, i := range serie.indexes {
-		if serie.autocast {
-			castRecord, ok := record[i].(T)
-			if !ok {
-
+func computeFloat(serie series[float64], record []interface{}) (float64, error) {
+	var value float64
+	if serie.compute != nil {
+		var elements []interface{}
+		for _, i := range serie.indexes {
+			floatRecord, err := toFloat(record[i])
+			if err != nil {
+				elements = append(elements, record[i])
+			} else {
+				elements = append(elements, floatRecord)
 			}
 		}
-		elements = append(elements, record[i])
-	}
-	if serie.compute != nil {
 		var err error
-		value, err = serie.compute(record)
+		value, err = serie.compute(elements)
 		if err != nil {
-			return *new(T), fmt.Errorf("while computing for %v: %w", elements, err)
+			return 0, fmt.Errorf("while computing for %v: %w", elements, err)
 		}
 	} else {
-		var ok bool
-		value, ok = record[0].(T)
-		if !ok {
-			return *new(T), fmt.Errorf("invalid type %T for element %s", record[0], record[0])
+		var err error
+		value, err = toFloat(record[serie.indexes[0]])
+		if err != nil {
+			return 0, err
 		}
 	}
 	return value, nil
 }
 
-func filter(filters map[int]Filter, series []series[string], records [][]interface{}) ([][]interface{}, error) {
-	var filteredRecords [][]interface{}
-	for _, record := range records {
-		keep := true
-		for i, f := range filters {
-			if !f(record[i]) {
-				keep = false
-			}
+func computeString(serie series[string], record []interface{}) (string, error) {
+	var value string
+	if serie.compute != nil {
+		var elements []interface{}
+		for _, i := range serie.indexes {
+			elements = append(elements, record[i])
 		}
-		for _, serie := range series {
-			value, err := compute(serie, record)
-			if err != nil {
-				return nil, err
-			}
-			if serie.filter != nil && !serie.filter(value) {
-				keep = false
-			}
+		var err error
+		value, err = serie.compute(elements)
+		if err != nil {
+			return "", fmt.Errorf("while computing for %v: %w", elements, err)
 		}
-		if keep {
-			filteredRecords = append(filteredRecords, record)
+	} else {
+		var ok bool
+		value, ok = record[serie.indexes[0]].(string)
+		if !ok {
+			value = fmt.Sprintf("%v", record[0])
+		}
+	}
+	return value, nil
+}
+
+func filter(filters map[int]Filter, series []*series[string], records [][]interface{}, headers bool) ([][]interface{}, error) {
+	filteredRecords := make([][]interface{}, 0)
+	for i, record := range records {
+		if i != 0 || !headers {
+			keep := true
+			for j, f := range filters {
+				if !f(record[j]) {
+					keep = false
+				}
+			}
+			for _, serie := range series {
+				value, err := computeString(*serie, record)
+				if err != nil {
+					return nil, fmt.Errorf("while filtering in serie %q for record %v: %w", serie.name, record, err)
+				}
+				if serie.filter != nil && !serie.filter(value) {
+					keep = false
+				}
+			}
+			if keep {
+				filteredRecords = append(filteredRecords, record)
+			}
 		}
 	}
 	return filteredRecords, nil
 }
 
-func walk(headers *headers, series []series[string], record []interface{}) (string, error) {
+func walk(headers *headers, series []*series[string], record []interface{}) (string, error) {
 	h := headers
 	for _, serie := range series {
-		value, err := compute(serie, record)
+		value, err := computeString(*serie, record)
 		if err != nil {
-			return "", err
+			return "", fmt.Errorf("while walking in serie %q for record %v: %w", serie.name, record, err)
 		}
 		h = h.sort(serie.sort).walk(value)
 	}

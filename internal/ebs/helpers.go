@@ -13,18 +13,14 @@ import (
 	"strings"
 )
 
-var float pivot.Compute[float64] = func(elements []interface{}) (float64, error) {
-	return toFloat(elements[0])
-}
-
 var monthlySplit pivot.Compute[string] = func(elements []interface{}) (string, error) {
 	e, ok := elements[0].(string)
 	if !ok {
-		return "", fmt.Errorf("invalid type %T for element %s", elements[0], elements[0])
+		return "", pivot.InvalidType(elements[0])
 	}
 	month, _, err := utils.ParseDateYYYYsMM(e)
 	if err != nil {
-		return "", fmt.Errorf("invalid YYYY-MM format for element %s", e)
+		return "", fmt.Errorf("invalid YYYY-MM format for element %q: %w", e, err)
 	}
 	return utils.Month(month), nil
 }
@@ -32,23 +28,23 @@ var monthlySplit pivot.Compute[string] = func(elements []interface{}) (string, e
 var quaterlySplit pivot.Compute[string] = func(elements []interface{}) (string, error) {
 	e, ok := elements[0].(string)
 	if !ok {
-		return "", fmt.Errorf("invalid type %T for element %s", elements[0], elements[0])
+		return "", pivot.InvalidType(elements[0])
 	}
 	month, _, err := utils.ParseDateYYYYsMM(e)
 	if err != nil {
-		return "", fmt.Errorf("invalid YYYY-MM format for element %s", e)
+		return "", fmt.Errorf("invalid YYYY-MM format for element %q: %w", e, err)
 	}
 	return utils.Quarter(month), nil
 }
 
 var dailyRate pivot.Compute[float64] = func(elements []interface{}) (float64, error) {
-	hours, err := toFloat(elements[0])
-	if err != nil {
-		return 0, err
+	hours, ok := elements[0].(float64)
+	if !ok {
+		return 0, pivot.InvalidType(elements[0])
 	}
-	cost, err := toFloat(elements[1])
-	if err != nil {
-		return 0, err
+	cost, ok := elements[1].(float64)
+	if !ok {
+		return 0, pivot.InvalidType(elements[0])
 	}
 	if hours == 0 {
 		return 0, nil
@@ -61,7 +57,7 @@ var projectGroups = func(prefixProject bool) pivot.Compute[string] {
 	return func(elements []interface{}) (string, error) {
 		e, ok := elements[0].(string)
 		if !ok {
-			return "", fmt.Errorf("invalid type %T for element %s", elements[0], elements[0])
+			return "", pivot.InvalidType(elements[0])
 		}
 		var prefix string
 		if prefixProject {
@@ -110,19 +106,6 @@ func uniquePeople(verbose bool, index int, peopleLists ...[][]string) []string {
 		}
 	}
 	return result
-}
-
-func toFloat(element interface{}) (float64, error) {
-	e, ok := element.(string)
-	if !ok {
-		return 0, fmt.Errorf("invalid type %T for element %s", element, element)
-	}
-	e = strings.Replace(e, ",", ".", 1)
-	result, err := strconv.ParseFloat(e, 32)
-	if err != nil {
-		return 0, fmt.Errorf("invalid numeric format for element %s", e)
-	}
-	return result, nil
 }
 
 func parseProjectID(projectName string) string {
