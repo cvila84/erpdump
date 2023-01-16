@@ -33,10 +33,10 @@ func GenerateFromEBSExport(csvDataFile, csvTablePath, csvTablePrefix string) err
 		Filter(2, pivot.In(otaProjects)).
 		//Row([]int{0}, table.Group([][]string{OtaPeople}, []string{"OTA"}, "External"), nil, table.AlphaSort).
 		Row([]int{0}, nil, nil, pivot.AlphaSort).
-		Column([]int{2}, pivot.Group([][]string{otaProjects, functionalProjects}, []string{"OTA", "Functional"}, "Other"), nil, pivot.AlphaSort).
+		Column([]int{2}, nil, pivot.Group([][]string{otaProjects, functionalProjects}, []string{"OTA", "Functional"}, "Other"), pivot.AlphaSort).
 		StandardColumn(2).
 		//StandardColumn(3).
-		Values([]int{4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15}, pivot.SumFloats, pivot.Sum, nil)
+		Values([]int{4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15}, false, pivot.SumFloats, pivot.Sum)
 	err = table.Generate()
 	if err != nil {
 		return err
@@ -72,11 +72,11 @@ func GenerateFromFinanceExport(csvDataFiles []string, csvTablePath, csvTablePref
 		Row([]int{14}, nil, nil, pivot.AlphaSort).
 		StandardRow(26).
 		Row([]int{32}, nil, nil, pivot.AlphaSort).
-		Column([]int{3}, quaterlySplit, nil, pivot.AlphaSort).
-		Column([]int{14, 32}, projectGroups(false), nil, pivot.AlphaSort).
-		Values([]int{40}, float, pivot.Sum, nil).
-		Values([]int{21}, float, pivot.Sum, nil).
-		Values([]int{40, 21}, dailyRate, pivot.Sum, nil)
+		Column([]int{3}, nil, quaterlySplit, pivot.AlphaSort).
+		Column([]int{14, 32}, nil, projectGroups(false), pivot.AlphaSort).
+		Values([]int{40, 21}, true, dailyRate, pivot.Set).
+		Values([]int{40}, true, nil, pivot.Sum).
+		Values([]int{21}, true, nil, pivot.Sum)
 	err := table.Generate()
 	if err != nil {
 		return err

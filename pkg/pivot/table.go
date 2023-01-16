@@ -8,6 +8,12 @@ import (
 type headerTypes interface{ string }
 type valueTypes interface{ int | float64 }
 
+type test interface {
+	valueTypes
+	fmt.Stringer
+	Value()
+}
+
 type Filter func(element interface{}) bool
 
 type Sort func(elements []string) []string
@@ -17,17 +23,18 @@ type Compute[T headerTypes | valueTypes] func(record []interface{}) (T, error)
 type Action int
 
 const (
-	None Action = iota
+	Set Action = iota
 	Count
 	Sum
 )
 
 type series[T headerTypes | valueTypes] struct {
-	indexes []int
-	filter  Filter
-	compute Compute[T]
-	action  Action
-	sort    Sort
+	indexes  []int
+	autocast bool
+	filter   Filter
+	compute  Compute[T]
+	action   Action
+	sort     Sort
 }
 
 type Table[T valueTypes] struct {
@@ -56,25 +63,46 @@ func NewTable[T valueTypes](data [][]interface{}) *Table[T] {
 	}
 }
 
-func (t *Table[T]) updateCell(rowLabel string, columnLabel string, record []interface{}) error {
+func (t *Table[T]) updateCellByCompute(rowLabel string, columnLabel string, record []interface{}, onlyCompute bool) error {
 	for is, serie := range t.valueSeries {
-		rr, ok := t.pivot[rowLabel]
-		if !ok {
-			rr = make(map[string][]T)
-			t.pivot[rowLabel] = rr
+		if (serie.compute != nil && onlyCompute) || (serie.compute == nil && !onlyCompute) {
+			rr, ok := t.pivot[rowLabel]
+			if !ok {
+				rr = make(map[string][]T)
+				t.pivot[rowLabel] = rr
+			}
+			rc, ok := rr[columnLabel]
+			if !ok {
+				rc = make([]T, len(t.valueSeries))
+				rr[columnLabel] = rc
+			}
+			switch serie.action {
+			case Count:
+				rc[is]++
+			case Sum:
+				value, err := compute(serie, record)
+				if err != nil {
+					return err
+				}
+				rc[is] += value
+			case Set:
+				var err error
+				rc[is], err = compute(serie, record)
+				if err != nil {
+					return err
+				}
+			}
 		}
-		rc, ok := rr[columnLabel]
-		if !ok {
-			rc = make([]T, len(t.valueSeries))
-			rr[columnLabel] = rc
-		}
-		value, err := compute(rc, serie, record)
-		if err != nil {
-			return err
-		}
-		rc[is] = value
 	}
 	return nil
+}
+
+func (t *Table[T]) updateCell(rowLabel string, columnLabel string, record []interface{}) error {
+	err := t.updateCellByCompute(rowLabel, columnLabel, record, false)
+	if err != nil {
+		return err
+	}
+	return t.updateCellByCompute(rowLabel, columnLabel, record, true)
 }
 
 func (t *Table[T]) updateCrossCells(rowLabel string, columnLabel string, record []interface{}) error {
@@ -119,7 +147,7 @@ func (t *Table[T]) Generate() error {
 			return err
 		}
 		if len(columnLabel) == 0 {
-			return fmt.Errorf("empty row labels are not supported")
+			return fmt.Errorf("empty column labels are not supported")
 		}
 		err = t.updateCell(rowLabel, columnLabel, record)
 		if err != nil {
@@ -133,6 +161,8 @@ func (t *Table[T]) Generate() error {
 	return nil
 }
 
+// ToCSV
+// TODO manage multi-values through virtual column
 func (t *Table[T]) ToCSV() string {
 	columnLabels := t.columnHeaders.labels(true, true)
 	rowLabels := t.rowHeaders.labels(true, true)
@@ -192,10 +222,10 @@ func (t *Table[T]) StandardRow(index int) *Table[T] {
 func (t *Table[T]) Row(indexes []int, compute Compute[string], filter Filter, sort Sort) *Table[T] {
 	t.rowSeries = append(t.rowSeries, series[string]{
 		indexes: indexes,
+		compute: compute,
 		filter:  filter,
 		sort:    sort,
-		compute: compute,
-		action:  None,
+		action:  Set,
 	})
 	return t
 }
@@ -208,24 +238,31 @@ func (t *Table[T]) Column(indexes []int, filter Filter, compute Compute[string],
 	t.columnSeries = append(t.columnSeries, series[string]{
 		indexes: indexes,
 		filter:  filter,
-		sort:    sort,
 		compute: compute,
-		action:  None,
+		sort:    sort,
+		action:  Set,
 	})
 	return t
 }
 
-func (t *Table[T]) StandardValues(index int, action Action) *Table[T] {
-	return t.Values([]int{index}, nil, nil, action)
+func (t *Table[T]) StandardValues(index int, autocast bool, action Action) *Table[T] {
+	t.valueSeries = append(t.valueSeries, series[T]{
+		indexes:  []int{index},
+		autocast: autocast,
+		sort:     nil,
+		compute:  nil,
+		action:   action,
+	})
+	return t
 }
 
-func (t *Table[T]) Values(indexes []int, filter Filter, compute Compute[T], action Action) *Table[T] {
+func (t *Table[T]) Values(indexes []int, autocast bool, compute Compute[T], action Action) *Table[T] {
 	t.valueSeries = append(t.valueSeries, series[T]{
-		indexes: indexes,
-		filter:  filter,
-		sort:    nil,
-		compute: compute,
-		action:  action,
+		indexes:  indexes,
+		autocast: autocast,
+		sort:     nil,
+		compute:  compute,
+		action:   action,
 	})
 	return t
 }

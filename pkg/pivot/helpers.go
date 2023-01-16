@@ -2,6 +2,7 @@ package pivot
 
 import (
 	"fmt"
+	"strconv"
 )
 
 func valueString(v interface{}) string {
@@ -14,25 +15,37 @@ func valueString(v interface{}) string {
 	return fmt.Sprintf("%v", v)
 }
 
-func compute[T headerTypes | valueTypes](t []T, serie series[T], record []interface{}) (T, error) {
+func bestEffortCast[T valueTypes](v interface{}) T {
+	switch v.(type) {
+	case string:
+		strconv.Atoi
+	case int:
+	}
+}
+
+func compute[T headerTypes | valueTypes](serie series[T], record []interface{}) (T, error) {
 	var value T
-	var previousElements []T
-	var computeElements []interface{}
+	var elements []interface{}
 	for _, i := range serie.indexes {
-		previousElements = append(previousElements, t[i])
-		computeElements = append(computeElements, record[i])
+		if serie.autocast {
+			castRecord, ok := record[i].(T)
+			if !ok {
+
+			}
+		}
+		elements = append(elements, record[i])
 	}
 	if serie.compute != nil {
 		var err error
-		value, err = serie.compute(computeElements)
+		value, err = serie.compute(record)
 		if err != nil {
-			return *new(T), fmt.Errorf("while computing for %v: %w", computeElements, err)
+			return *new(T), fmt.Errorf("while computing for %v: %w", elements, err)
 		}
 	} else {
 		var ok bool
-		value, ok = computeElements[0].(T)
+		value, ok = record[0].(T)
 		if !ok {
-			return *new(T), fmt.Errorf("invalid type %T for element %s", computeElements[0], computeElements[0])
+			return *new(T), fmt.Errorf("invalid type %T for element %s", record[0], record[0])
 		}
 	}
 	return value, nil
