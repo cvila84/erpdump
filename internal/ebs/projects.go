@@ -1,5 +1,9 @@
 package ebs
 
+var Workload = "Workload"
+var Travel = "Temps & agency costs"
+var Recharge = "Allocations & recharges mgmt"
+
 var otaProjects = []string{
 	"R1R29750",
 	"R1R29751",

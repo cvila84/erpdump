@@ -411,52 +411,58 @@ var managers = []string{
 	"Kumar,Vivek",
 }
 
-type projectTeam struct {
+type projectCostType struct {
 	budget    []string
 	extension []string
 	other     []string
 }
 
-var projectsTeam map[string]projectTeam
+var projectsTeamWorkload map[string]projectCostType
+
+var projectsOtherCosts map[string]projectCostType
 
 func init() {
 	verbose := false
-	projectsTeam = make(map[string]projectTeam)
-	projectsTeam["R1R29750"] = projectTeam{
+	projectsTeamWorkload = make(map[string]projectCostType)
+	projectsOtherCosts = make(map[string]projectCostType)
+	projectsTeamWorkload["R1R29750"] = projectCostType{
 		budget:    uniquePeople(verbose, 1, aotaDevBudgetPeople, cotaDevL3BudgetPeople),
 		extension: uniquePeople(verbose, 1, ext29750MyosdTeamPeople, ext29750Tls13People, ext29750NewAppletsPeople, ext29750NgmMigrationPeople),
 		other:     uniquePeople(verbose, 1, aotaDevOtherPeople, cotaDevL3OtherPeople),
 	}
-	projectsTeam["R1R29751"] = projectTeam{
+	projectsOtherCosts["R1R29750"] = projectCostType{
+		budget: []string{Recharge},
+	}
+	projectsTeamWorkload["R1R29751"] = projectCostType{
 		budget:    uniquePeople(verbose, 1, cotaPtfBudgetPeople),
 		extension: uniquePeople(verbose, 1, ext29751OtaDemoTenantPeople),
 		other:     uniquePeople(verbose, 1, cotaPtfOtherPeople),
 	}
-	projectsTeam["R0S29752"] = projectTeam{
+	projectsTeamWorkload["R0S29752"] = projectCostType{
 		budget: uniquePeople(verbose, 1, aotaL3BudgetPeople, cotaDevL3BudgetPeople),
 		other:  uniquePeople(verbose, 1, aotaL3OtherPeople, cotaDevL3OtherPeople),
 	}
-	projectsTeam["R1R29753"] = projectTeam{
+	projectsTeamWorkload["R1R29753"] = projectCostType{
 		budget:    uniquePeople(verbose, 1, innovationBudgetPeople),
 		extension: uniquePeople(verbose, 1, ext29753DigitalWalletPeople, ext29753privateNetworkPeople),
 		other:     uniquePeople(verbose, 1, innovationOtherPeople),
 	}
-	projectsTeam["R0R29754"] = projectTeam{
+	projectsTeamWorkload["R0R29754"] = projectCostType{
 		budget: uniquePeople(verbose, 1, improvmentBudgetPeople),
 		other:  uniquePeople(verbose, 1, improvmentOtherPeople),
 	}
-	projectsTeam["R0R29805"] = projectTeam{
+	projectsTeamWorkload["R0R29805"] = projectCostType{
 		budget: uniquePeople(verbose, 1, centralRDPeople),
 	}
-	projectsTeam["R0T30005"] = projectTeam{
+	projectsTeamWorkload["R0T30005"] = projectCostType{
 		budget: uniquePeople(verbose, 1, transversalPeople),
 	}
-	projectsTeam["R1R30027"] = projectTeam{
+	projectsTeamWorkload["R1R30027"] = projectCostType{
 		budget:    uniquePeople(verbose, 1, tacBudgetPeople),
 		extension: uniquePeople(verbose, 1, ext30027transatelActPeople),
 		other:     uniquePeople(verbose, 1, tacOtherPeople),
 	}
-	projectsTeam["R1R30028"] = projectTeam{
+	projectsTeamWorkload["R1R30028"] = projectCostType{
 		budget: uniquePeople(verbose, 1, iotBudgetPeople),
 		other:  uniquePeople(verbose, 1, iotOtherPeople),
 	}

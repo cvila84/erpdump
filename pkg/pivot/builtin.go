@@ -23,6 +23,22 @@ var ReverseAlphaSort Sort = func(elements []string) []string {
 	return elements
 }
 
+var MonthSort Sort = func(elements []string) []string {
+	months := []string{"Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"}
+	var result []string
+	k := 0
+	for i := 0; i < len(months); i++ {
+		for j := 0; j < len(elements); j++ {
+			if months[i] == elements[j] {
+				result = append(result, elements[j])
+				k++
+				break
+			}
+		}
+	}
+	return result
+}
+
 var Group = func(groups [][]string, groupLabels []string, noneLabel string) Compute[string] {
 	return func(elements []interface{}) (string, error) {
 		for i, group := range groups {

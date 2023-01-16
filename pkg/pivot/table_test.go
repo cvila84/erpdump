@@ -60,3 +60,26 @@ func TestTable(t *testing.T) {
 	}
 	fmt.Println(table.ToCSV())
 }
+
+func TestComputeSet(t *testing.T) {
+	rawData := [][]interface{}{
+		{"A", "B", "V1", "V2"},
+		{"A1", "B1", 4, 6},
+		{"A1", "B2", 2, 4},
+		{"A1", "B1", 3, 5},
+	}
+	compute := func(elements []interface{}) (float64, error) {
+		return (elements[0].(float64)) / (elements[1].(float64)), nil
+	}
+	table := NewTable(rawData, true).
+		StandardRow(0).
+		StandardColumn(1).
+		StandardValues(2, Sum).
+		StandardValues(3, Sum).
+		Values([]int{2, 3}, compute, Set, Digits(2))
+	err := table.Generate()
+	if err != nil {
+		t.Fatalf("%s", err)
+	}
+	fmt.Println(table.ToCSV())
+}

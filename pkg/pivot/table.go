@@ -280,7 +280,7 @@ func (t *Table) StandardRow(index int) *Table {
 	return t.Row([]int{index}, nil, nil, nil)
 }
 
-func (t *Table) Row(indexes []int, compute Compute[string], filter Filter, sort Sort) *Table {
+func (t *Table) Row(indexes []int, filter Filter, compute Compute[string], sort Sort) *Table {
 	t.rowSeries = append(t.rowSeries, &series[string]{
 		indexes: indexes,
 		compute: compute,

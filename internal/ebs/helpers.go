@@ -9,7 +9,6 @@ import (
 	"golang.org/x/text/encoding/charmap"
 	"os"
 	"regexp"
-	"strconv"
 	"strings"
 )
 
@@ -63,20 +62,38 @@ var projectGroups = func(prefixProject bool) pivot.Compute[string] {
 		if prefixProject {
 			prefix = e + "-"
 		}
-		team, ok := projectsTeam[e]
+		teamWorkload, ok := projectsTeamWorkload[e]
 		if ok {
-			for _, p := range team.budget {
-				if p == elements[1] {
+			for _, p := range teamWorkload.budget {
+				if p == elements[1] && Workload == elements[2] {
 					return prefix + "Budget", nil
 				}
 			}
-			for _, p := range team.extension {
-				if p == elements[1] {
-					return prefix + "Ext", nil
+			for _, p := range teamWorkload.extension {
+				if p == elements[1] && Workload == elements[2] {
+					return prefix + "Extension", nil
 				}
 			}
-			for _, p := range team.other {
-				if p == elements[1] {
+			for _, p := range teamWorkload.other {
+				if p == elements[1] && Workload == elements[2] {
+					return prefix + "Other", nil
+				}
+			}
+		}
+		otherCosts, ok := projectsOtherCosts[e]
+		if ok {
+			for _, p := range otherCosts.budget {
+				if p == elements[2] {
+					return prefix + "Budget", nil
+				}
+			}
+			for _, p := range otherCosts.extension {
+				if p == elements[2] {
+					return prefix + "Extension", nil
+				}
+			}
+			for _, p := range otherCosts.other {
+				if p == elements[2] {
 					return prefix + "Other", nil
 				}
 			}
@@ -220,112 +237,5 @@ func groupEBSTimeCardsByMonth(csvData [][]string, verbose bool) ([][]interface{}
 			}
 		}
 	}
-	return rawData, nil
-}
-
-// filterBudgetPivotData
-// record[3]=month (yyyy-mm)
-// record[14]=project
-// record[21]=cost
-// record[26]=category
-// record[32]=employee
-// record[40]=hours
-// -->
-// record[0]=employee
-// record[1]=project
-// record[2]=category
-// record[3-14]=hours
-// record[15-26]=cost
-
-func filterBudgetPivotData(csvData [][]string, verbose bool) ([][]interface{}, error) {
-	tams := map[string]*timeAndMaterial{}
-	for _, record := range csvData {
-		project := strings.TrimSpace(record[14])
-		employee := strings.TrimSpace(record[32])
-		month, _, err := utils.ParseDateYYYYsMM(record[3])
-		if err != nil {
-			return nil, fmt.Errorf("cannot parse month field %q: %w", record[3], err)
-		}
-		record[40] = strings.Replace(record[40], ",", ".", 1)
-		monthHours, err := strconv.ParseFloat(record[40], 32)
-		if err != nil {
-			return nil, fmt.Errorf("cannot parse hours field %q: %w", record[40], err)
-		}
-		record[21] = strings.Replace(record[21], ",", ".", 1)
-		monthCost, err := strconv.ParseFloat(record[21], 32)
-		if err != nil {
-			return nil, fmt.Errorf("cannot parse hours field %q: %w", record[21], err)
-		}
-		monthCost = -monthCost
-		if monthHours == 0 && monthCost == 0 {
-			if verbose {
-				fmt.Printf("WARNING: no computed hours nor costs for entry %v\n", record)
-			}
-			continue
-		}
-		tam, ok := tams[project]
-		if !ok {
-			tam = &timeAndMaterial{}
-			tams[project] = tam
-		}
-		category := strings.TrimSpace(record[26])
-		if strings.ToUpper(category) == "WORKLOAD" {
-			tam.AddWorkload("", employee, "", month, monthHours, 0, monthCost)
-		} else {
-			tam.AddCosts("", category, month, monthCost)
-		}
-	}
-
-	var fillRecord = func(employee, project, category string, hours, costs []float64) []interface{} {
-		record := make([]interface{}, 27)
-		if hours == nil {
-			hours = make([]float64, 12)
-		}
-		record[0] = employee
-		record[1] = project
-		record[2] = category
-		record[3] = hours[0]
-		record[4] = hours[1]
-		record[5] = hours[2]
-		record[6] = hours[3]
-		record[7] = hours[4]
-		record[8] = hours[5]
-		record[9] = hours[6]
-		record[10] = hours[7]
-		record[11] = hours[8]
-		record[12] = hours[9]
-		record[13] = hours[10]
-		record[14] = hours[11]
-		record[15] = costs[0]
-		record[16] = costs[1]
-		record[17] = costs[2]
-		record[18] = costs[3]
-		record[19] = costs[4]
-		record[20] = costs[5]
-		record[21] = costs[6]
-		record[22] = costs[7]
-		record[23] = costs[8]
-		record[24] = costs[9]
-		record[25] = costs[10]
-		record[26] = costs[11]
-		return record
-	}
-
-	var rawData [][]interface{}
-	for project, tam := range tams {
-		entry := tam.entries[""]
-		for employee, workload := range entry.workload {
-			rawData = append(rawData, fillRecord(employee, project, "Workload", workload.hours, workload.costs))
-		}
-		for category, costs := range entry.others {
-			rawData = append(rawData, fillRecord("N/A", project, category, nil, costs))
-		}
-	}
-
-	var sb strings.Builder
-	for _, r := range rawData {
-		sb.WriteString(fmt.Sprintf("%q;%q;%q;%.2f;%.2f;%.2f;%.2f;%.2f;%.2f;%.2f;%.2f;%.2f;%.2f;%.2f;%.2f;%.2f;%.2f;%.2f;%.2f;%.2f;%.2f;%.2f;%.2f;%.2f;%.2f;%.2f;%.2f\n", r[0], r[1], r[2], r[3], r[4], r[5], r[6], r[7], r[8], r[9], r[10], r[11], r[12], r[13], r[14], r[15], r[16], r[17], r[18], r[19], r[20], r[21], r[22], r[23], r[24], r[25], r[26]))
-	}
-	_ = saveCsvFile("./filterBudgetPivotData-debug.csv", sb.String())
 	return rawData, nil
 }

@@ -70,10 +70,10 @@ func GenerateFromFinanceExport(csvDataFiles []string, csvTablePath, csvTablePref
 
 	table := pivot.NewTable(allRawData, true).
 		Row([]int{14}, nil, nil, pivot.AlphaSort).
+		Row([]int{14, 32, 26}, nil, projectGroups(false), pivot.AlphaSort).
 		StandardRow(26).
 		Row([]int{32}, nil, nil, pivot.AlphaSort).
-		Column([]int{3}, nil, quaterlySplit, pivot.AlphaSort).
-		Column([]int{14, 32}, nil, projectGroups(false), pivot.AlphaSort).
+		Column([]int{3}, nil, monthlySplit, pivot.MonthSort).
 		Values([]int{40, 21}, dailyRate, pivot.Set, pivot.Digits(1)).
 		Values([]int{40}, nil, pivot.Sum, pivot.Digits(0)).
 		Values([]int{21}, nil, pivot.Sum, pivot.Digits(0))
