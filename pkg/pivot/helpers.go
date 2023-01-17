@@ -25,7 +25,34 @@ func toFloat(element interface{}) (float64, error) {
 	return result, nil
 }
 
-func computeFloat(serie series[float64], record []interface{}) (float64, error) {
+func computeFloatWithCell(serie series[float64], cells []cell) (float64, error) {
+	var value float64
+	if serie.compute != nil {
+		var elements []interface{}
+		for _, i := range serie.indexes {
+			floatRecord, err := toFloat(record[i])
+			if err != nil {
+				elements = append(elements, record[i])
+			} else {
+				elements = append(elements, floatRecord)
+			}
+		}
+		var err error
+		value, err = serie.compute(elements)
+		if err != nil {
+			return 0, fmt.Errorf("while computing for %v: %w", elements, err)
+		}
+	} else {
+		var err error
+		value, err = toFloat(record[serie.indexes[0]])
+		if err != nil {
+			return 0, err
+		}
+	}
+	return value, nil
+}
+
+func computeFloatWithRecord(serie series[float64], record []interface{}) (float64, error) {
 	var value float64
 	if serie.compute != nil {
 		var elements []interface{}

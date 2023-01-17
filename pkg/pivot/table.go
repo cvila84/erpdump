@@ -5,7 +5,7 @@ import (
 	"strings"
 )
 
-type Cell interface {
+type cell interface {
 	fmt.Stringer
 	GetValue() float64
 	SetValue(float64)
@@ -47,9 +47,10 @@ type Compute[T SeriesType] func(record []interface{}) (T, error)
 type Action int
 
 const (
-	Set Action = iota
+	none Action = iota
 	Count
 	Sum
+	set
 )
 
 type SeriesType interface{ string | float64 }
@@ -87,26 +88,45 @@ func (s *series[T]) NameFromHeaders(headers []interface{}) {
 type Table struct {
 	data          [][]interface{}
 	dataHeaders   bool
-	pivot         map[string]map[string][]Cell
+	pivot         map[string]map[string][]cell
 	filters       map[int]Filter
 	rowHeaders    *headers
 	columnHeaders *headers
 	rowSeries     []*series[string]
 	columnSeries  []*series[string]
 	valueSeries   []*series[float64]
+	indexes       map[int]int
+	err           error
 }
 
 func NewTable(data [][]interface{}, dataHeaders bool) *Table {
+	var err error
+	if data == nil || (len(data) == 0 && !dataHeaders) || (len(data) <= 1 && dataHeaders) {
+		err = fmt.Errorf("no input data")
+	} else if len(data[0]) == 0 {
+		err = fmt.Errorf("no input data")
+	} else {
+		length := -1
+		for _, record := range data {
+			if length < 0 {
+				length = len(record)
+			} else if len(record) != length {
+				err = fmt.Errorf("input data has variable records size")
+			}
+		}
+	}
 	return &Table{
 		data:          data,
 		dataHeaders:   dataHeaders,
-		pivot:         make(map[string]map[string][]Cell),
+		pivot:         make(map[string]map[string][]cell),
 		filters:       make(map[int]Filter),
 		rowHeaders:    newRootHeaders(nil),
 		columnHeaders: newRootHeaders(nil),
 		rowSeries:     make([]*series[string], 0),
 		columnSeries:  make([]*series[string], 0),
 		valueSeries:   make([]*series[float64], 0),
+		indexes:       make(map[int]int, 0),
+		err:           err,
 	}
 }
 
@@ -115,12 +135,12 @@ func (t *Table) updateCellByCompute(rowLabel string, columnLabel string, record 
 		if (serie.compute != nil && onlyCompute) || (serie.compute == nil && !onlyCompute) {
 			rr, ok := t.pivot[rowLabel]
 			if !ok {
-				rr = make(map[string][]Cell)
+				rr = make(map[string][]cell)
 				t.pivot[rowLabel] = rr
 			}
 			rc, ok := rr[columnLabel]
 			if !ok {
-				rc = make([]Cell, len(t.valueSeries))
+				rc = make([]cell, len(t.valueSeries))
 				rr[columnLabel] = rc
 			}
 			if rc[is] == nil {
@@ -132,13 +152,13 @@ func (t *Table) updateCellByCompute(rowLabel string, columnLabel string, record 
 			case Count:
 				rc[is].IncValue()
 			case Sum:
-				value, err := computeFloat(*serie, record)
+				value, err := computeFloatWithRecord(*serie, record)
 				if err != nil {
 					return fmt.Errorf("while updating cell [%q,%q] with record %v: %w", rowLabel, columnLabel, record, err)
 				}
 				rc[is].AddValue(value)
-			case Set:
-				value, err := computeFloat(*serie, record)
+			case set:
+				value, err := computeFloatWithCell(*serie, rc)
 				if err != nil {
 					return fmt.Errorf("while updating cell [%q,%q] with record %v: %w", rowLabel, columnLabel, record, err)
 				}
@@ -150,6 +170,7 @@ func (t *Table) updateCellByCompute(rowLabel string, columnLabel string, record 
 }
 
 func (t *Table) updateCell(rowLabel string, columnLabel string, record []interface{}) error {
+	for _, serie :=
 	err := t.updateCellByCompute(rowLabel, columnLabel, record, false)
 	if err != nil {
 		return err
@@ -172,6 +193,77 @@ func (t *Table) updateCrossCells(rowLabel string, columnLabel string, record []i
 		}
 		sumColumnLabel = parentHeaderLabel(sumColumnLabel)
 	}
+	return nil
+}
+
+func (t *Table) registerRow(indexes []int, filter Filter, compute Compute[string], sort Sort) error {
+	if len(indexes) == 0 {
+		return fmt.Errorf("invalid row definition, no indexes given")
+	}
+	if compute == nil && len(indexes) != 1 {
+		return fmt.Errorf("invalid row definition, several indexes with no compute given")
+	}
+	if compute == nil {
+		_, ok := t.indexes[indexes[0]]
+		if ok {
+			return fmt.Errorf("invalid row definition, index already used")
+		}
+		t.indexes[indexes[0]] = len(t.rowSeries)
+	}
+	t.rowSeries = append(t.rowSeries, &series[string]{
+		indexes: indexes,
+		filter:  filter,
+		compute: compute,
+		action:  none,
+		sort:    sort,
+	})
+	return nil
+}
+
+func (t *Table) registerColumn(indexes []int, filter Filter, compute Compute[string], sort Sort) error {
+	if len(indexes) == 0 {
+		return fmt.Errorf("invalid column definition, no indexes given")
+	}
+	if compute == nil && len(indexes) != 1 {
+		return fmt.Errorf("invalid column definition, several indexes with no compute given")
+	}
+	if compute == nil {
+		_, ok := t.indexes[indexes[0]]
+		if ok {
+			return fmt.Errorf("invalid column definition, index already used")
+		}
+		t.indexes[indexes[0]] = len(t.columnSeries)
+	}
+	t.columnSeries = append(t.columnSeries, &series[string]{
+		indexes: indexes,
+		filter:  filter,
+		compute: compute,
+		action:  none,
+		sort:    sort,
+	})
+	return nil
+}
+
+func (t *Table) registerValue(indexes []int, compute Compute[float64], action Action, display string) error {
+	if len(indexes) == 0 {
+		return fmt.Errorf("invalid value definition, no indexes given")
+	}
+	if compute == nil && len(indexes) != 1 {
+		return fmt.Errorf("invalid value definition, several indexes with no compute given")
+	}
+	if compute == nil {
+		_, ok := t.indexes[indexes[0]]
+		if ok {
+			return fmt.Errorf("invalid value definition, index already used")
+		}
+		t.indexes[indexes[0]] = len(t.valueSeries)
+	}
+	t.valueSeries = append(t.valueSeries, &series[float64]{
+		indexes: indexes,
+		compute: compute,
+		action:  action,
+		display: display,
+	})
 	return nil
 }
 
@@ -281,13 +373,10 @@ func (t *Table) StandardRow(index int) *Table {
 }
 
 func (t *Table) Row(indexes []int, filter Filter, compute Compute[string], sort Sort) *Table {
-	t.rowSeries = append(t.rowSeries, &series[string]{
-		indexes: indexes,
-		compute: compute,
-		filter:  filter,
-		sort:    sort,
-		action:  Set,
-	})
+	err := t.registerRow(indexes, filter, compute, sort)
+	if t.err == nil {
+		t.err = err
+	}
 	return t
 }
 
@@ -296,34 +385,21 @@ func (t *Table) StandardColumn(index int) *Table {
 }
 
 func (t *Table) Column(indexes []int, filter Filter, compute Compute[string], sort Sort) *Table {
-	t.columnSeries = append(t.columnSeries, &series[string]{
-		indexes: indexes,
-		filter:  filter,
-		compute: compute,
-		sort:    sort,
-		action:  Set,
-	})
+	err := t.registerColumn(indexes, filter, compute, sort)
+	if t.err == nil {
+		t.err = err
+	}
 	return t
 }
 
 func (t *Table) StandardValues(index int, action Action) *Table {
-	t.valueSeries = append(t.valueSeries, &series[float64]{
-		indexes: []int{index},
-		sort:    nil,
-		compute: nil,
-		action:  action,
-		display: Digits(0),
-	})
-	return t
+	return t.Values([]int{index}, nil, action, Digits(0))
 }
 
 func (t *Table) Values(indexes []int, compute Compute[float64], action Action, display string) *Table {
-	t.valueSeries = append(t.valueSeries, &series[float64]{
-		indexes: indexes,
-		sort:    nil,
-		compute: compute,
-		action:  action,
-		display: display,
-	})
+	err := t.registerValue(indexes, compute, action, display)
+	if t.err == nil {
+		t.err = err
+	}
 	return t
 }
