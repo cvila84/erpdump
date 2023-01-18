@@ -1,0 +1,4 @@
+github.com/akutz/sortfold v0.2.1 h1:u9x3FC6oM+6gZKEVNRnmVafJgappwrv9YqpELQCYViI=
+github.com/akutz/sortfold v0.2.1/go.mod h1:m1NArmessx+/3z2N8MiiTjq79A3WwZwDDiZ7eeD4jHA=
+golang.org/x/text v0.6.0 h1:3XmdazWV+ubf7QgHSTWeykHOci5oeekaGJBLkrkaw4k=
+golang.org/x/text v0.6.0/go.mod h1:mrYo+phRRbMaCq/xk9113O4dZlRixOauAjOtrjsXDZ8=

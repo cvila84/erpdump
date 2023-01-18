@@ -7,10 +7,8 @@ import (
 
 type cell interface {
 	fmt.Stringer
-	GetValue() float64
 	SetValue(float64)
 	AddValue(float64)
-	IncValue()
 }
 
 type pivotCell struct {
@@ -22,20 +20,12 @@ func (p *pivotCell) String() string {
 	return fmt.Sprintf(p.fmtDisplay, p.value)
 }
 
-func (p *pivotCell) GetValue() float64 {
-	return p.value
-}
-
 func (p *pivotCell) SetValue(value float64) {
 	p.value = value
 }
 
 func (p *pivotCell) AddValue(value float64) {
 	p.value += value
-}
-
-func (p *pivotCell) IncValue() {
-	p.value++
 }
 
 type Filter func(element interface{}) bool
@@ -150,7 +140,7 @@ func (t *Table) updateCellByCompute(rowLabel string, columnLabel string, record 
 			}
 			switch serie.action {
 			case Count:
-				rc[is].IncValue()
+				rc[is].AddValue(1)
 			case Sum:
 				value, err := computeFloatWithRecord(*serie, record)
 				if err != nil {
@@ -170,7 +160,6 @@ func (t *Table) updateCellByCompute(rowLabel string, columnLabel string, record 
 }
 
 func (t *Table) updateCell(rowLabel string, columnLabel string, record []interface{}) error {
-	for _, serie :=
 	err := t.updateCellByCompute(rowLabel, columnLabel, record, false)
 	if err != nil {
 		return err
@@ -268,6 +257,18 @@ func (t *Table) registerValue(indexes []int, compute Compute[float64], action Ac
 }
 
 func (t *Table) Generate() error {
+	if t.err != nil {
+		return t.err
+	}
+	if len(t.rowSeries) == 0 {
+		return fmt.Errorf("no rows defined")
+	}
+	if len(t.columnSeries) == 0 {
+		return fmt.Errorf("no columns defined")
+	}
+	if len(t.valueSeries) == 0 {
+		return fmt.Errorf("no values defined")
+	}
 	var headerSeries []*series[string]
 	var headerLabels []interface{}
 	if t.dataHeaders {
@@ -368,11 +369,11 @@ func (t *Table) Filter(index int, filter Filter) *Table {
 	return t
 }
 
-func (t *Table) StandardRow(index int) *Table {
-	return t.Row([]int{index}, nil, nil, nil)
+func (t *Table) Row(index int) *Table {
+	return t.ComputedRow([]int{index}, nil, nil, nil)
 }
 
-func (t *Table) Row(indexes []int, filter Filter, compute Compute[string], sort Sort) *Table {
+func (t *Table) ComputedRow(indexes []int, filter Filter, compute Compute[string], sort Sort) *Table {
 	err := t.registerRow(indexes, filter, compute, sort)
 	if t.err == nil {
 		t.err = err
@@ -380,11 +381,11 @@ func (t *Table) Row(indexes []int, filter Filter, compute Compute[string], sort 
 	return t
 }
 
-func (t *Table) StandardColumn(index int) *Table {
-	return t.Column([]int{index}, nil, nil, nil)
+func (t *Table) Column(index int) *Table {
+	return t.ComputedColumn([]int{index}, nil, nil, nil)
 }
 
-func (t *Table) Column(indexes []int, filter Filter, compute Compute[string], sort Sort) *Table {
+func (t *Table) ComputedColumn(indexes []int, filter Filter, compute Compute[string], sort Sort) *Table {
 	err := t.registerColumn(indexes, filter, compute, sort)
 	if t.err == nil {
 		t.err = err
@@ -392,12 +393,16 @@ func (t *Table) Column(indexes []int, filter Filter, compute Compute[string], so
 	return t
 }
 
-func (t *Table) StandardValues(index int, action Action) *Table {
-	return t.Values([]int{index}, nil, action, Digits(0))
+func (t *Table) Values(index int, action Action, display string) *Table {
+	err := t.registerValue([]int{index}, nil, action, display)
+	if t.err == nil {
+		t.err = err
+	}
+	return t
 }
 
-func (t *Table) Values(indexes []int, compute Compute[float64], action Action, display string) *Table {
-	err := t.registerValue(indexes, compute, action, display)
+func (t *Table) ComputedValues(indexes []int, compute Compute[float64], display string) *Table {
+	err := t.registerValue(indexes, compute, set, display)
 	if t.err == nil {
 		t.err = err
 	}

@@ -38,22 +38,22 @@ func TestTable(t *testing.T) {
 	// A2/B1/C1          5       5
 	// Total     10      6       16
 	table := NewTable(rawData, false).
-		StandardRow(0).
-		StandardRow(1).
-		StandardRow(2).
-		StandardColumn(3).
-		StandardValues(4, Sum)
+		Row(0).
+		Row(1).
+		Row(2).
+		Column(3).
+		Values(4, Sum, Digits(0))
 	err := table.Generate()
 	if err != nil {
 		t.Fatalf("%s", err)
 	}
 	fmt.Println(table.ToCSV())
 	table = NewTable(rawData, false).
-		StandardRow(0).
-		StandardRow(1).
-		StandardColumn(2).
-		StandardColumn(3).
-		StandardValues(4, Sum)
+		Row(0).
+		Row(1).
+		Column(2).
+		Column(3).
+		Values(4, Sum, Digits(0))
 	err = table.Generate()
 	if err != nil {
 		t.Fatalf("%s", err)
@@ -72,14 +72,26 @@ func TestComputeSet(t *testing.T) {
 		return (elements[0].(float64)) / (elements[1].(float64)), nil
 	}
 	table := NewTable(rawData, true).
-		StandardRow(0).
-		StandardColumn(1).
-		StandardValues(2, Sum).
-		StandardValues(3, Sum).
-		Values([]int{3, 2}, compute, Digits(2))
+		Row(0).
+		Column(1).
+		ComputedValues([]int{3, 2}, compute, Digits(2)).
+		Values(3, Sum, Digits(0))
 	err := table.Generate()
 	if err != nil {
 		t.Fatalf("%s", err)
 	}
 	fmt.Println(table.ToCSV())
 }
+
+//pivot         map[string]map[string][]cell
+//rowHeaders    *headers
+//columnHeaders *headers
+//rowSeries     []*series[string]
+//columnSeries  []*series[string]
+//valueSeries   []*series[float64]
+
+//indexes       map[int]int
+// 0 => 0
+// 1 => 0
+// 2 => 0
+// 3 => 1

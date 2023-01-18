@@ -32,11 +32,11 @@ func GenerateFromEBSExport(csvDataFile, csvTablePath, csvTablePrefix string) err
 		//Filter(1, table.In(otaManagers)).
 		Filter(2, pivot.In(otaProjects)).
 		//Row([]int{0}, table.Group([][]string{OtaPeople}, []string{"OTA"}, "External"), nil, table.AlphaSort).
-		Row([]int{0}, nil, nil, pivot.AlphaSort).
-		Column([]int{2}, nil, pivot.Group([][]string{otaProjects, functionalProjects}, []string{"OTA", "Functional"}, "Other"), pivot.AlphaSort).
-		StandardColumn(2).
+		ComputedRow([]int{0}, nil, nil, pivot.AlphaSort).
+		ComputedColumn([]int{2}, nil, pivot.Group([][]string{otaProjects, functionalProjects}, []string{"OTA", "Functional"}, "Other"), pivot.AlphaSort).
+		Column(2).
 		//StandardColumn(3).
-		Values([]int{4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15}, pivot.SumFloats, pivot.Digits(1))
+		ComputedValues([]int{4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15}, pivot.SumFloats, pivot.Digits(1))
 	err = table.Generate()
 	if err != nil {
 		return err
@@ -69,14 +69,14 @@ func GenerateFromFinanceExport(csvDataFiles []string, csvTablePath, csvTablePref
 	// record[40]=hours
 
 	table := pivot.NewTable(allRawData, true).
-		Row([]int{14}, nil, nil, pivot.AlphaSort).
-		Row([]int{14, 32, 26}, nil, projectGroups(false), pivot.AlphaSort).
-		StandardRow(26).
-		Row([]int{32}, nil, nil, pivot.AlphaSort).
-		Column([]int{3}, nil, monthlySplit, pivot.MonthSort).
-		Values([]int{40, 21}, dailyRate, pivot.Digits(1)).
-		StandardValues(40, pivot.Sum).
-		StandardValues(21, pivot.Sum)
+		ComputedRow([]int{14}, nil, nil, pivot.AlphaSort).
+		ComputedRow([]int{14, 32, 26}, nil, projectGroups(false), pivot.AlphaSort).
+		Row(26).
+		ComputedRow([]int{32}, nil, nil, pivot.AlphaSort).
+		ComputedColumn([]int{3}, nil, monthlySplit, pivot.MonthSort).
+		ComputedValues([]int{40, 21}, dailyRate, pivot.Digits(1)).
+		Values(40, pivot.Sum).
+		Values(21, pivot.Sum)
 	err := table.Generate()
 	if err != nil {
 		return err
