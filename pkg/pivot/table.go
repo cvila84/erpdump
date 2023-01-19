@@ -82,11 +82,13 @@ type Table struct {
 	filters       map[int]Filter
 	rowHeaders    *headers
 	columnHeaders *headers
-	rowSeries     []*series[string]
-	columnSeries  []*series[string]
-	valueSeries   []*series[float64]
-	indexes       map[int]int
-	err           error
+	// TODO populate this variable when several values are requested and use it for Generate
+	valueHeaders *headers
+	rowSeries    []*series[string]
+	columnSeries []*series[string]
+	valueSeries  []*series[float64]
+	indexes      map[int]int
+	err          error
 }
 
 func NewTable(data [][]interface{}, dataHeaders bool) *Table {
@@ -246,6 +248,11 @@ func (t *Table) registerValue(indexes []int, compute Compute[float64], action Ac
 			return fmt.Errorf("invalid value definition, index already used")
 		}
 		t.indexes[indexes[0]] = len(t.valueSeries)
+	} else {
+		_, ok := t.indexes[indexes[0]]
+		if !ok {
+			t.indexes[indexes[0]] = len(t.valueSeries)
+		}
 	}
 	t.valueSeries = append(t.valueSeries, &series[float64]{
 		indexes: indexes,
@@ -401,6 +408,7 @@ func (t *Table) Values(index int, action Action, display string) *Table {
 	return t
 }
 
+// TODO give a name to computed values so we can display it in Generate when we have several values
 func (t *Table) ComputedValues(indexes []int, compute Compute[float64], display string) *Table {
 	err := t.registerValue(indexes, compute, set, display)
 	if t.err == nil {
