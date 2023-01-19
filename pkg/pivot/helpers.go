@@ -6,7 +6,7 @@ import (
 	"strings"
 )
 
-func toFloat(element interface{}) (float64, error) {
+func toFloat(element RawValue) (float64, error) {
 	switch element.(type) {
 	case int:
 		return float64(element.(int)), nil

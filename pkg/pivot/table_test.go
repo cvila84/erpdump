@@ -83,7 +83,7 @@ func TestComputeSet(t *testing.T) {
 	fmt.Println(table.ToCSV())
 }
 
-//pivot         map[string]map[string][]cell
+//cells         map[string]map[string][]cell
 //rowHeaders    *headers
 //columnHeaders *headers
 //rowSeries     []*series[string]
