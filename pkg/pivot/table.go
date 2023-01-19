@@ -13,8 +13,6 @@ type ValueFormat string
 
 type SeriesName string
 
-type DataIndex int
-
 type Filter func(RawValue) bool
 
 type Sort func([]Header) []Header
@@ -25,7 +23,7 @@ type valueType interface{ float64 }
 
 type converter[T valueType] func(RawValue) (T, error)
 
-type vSeriesFactory[T valueType] func(SeriesName, []DataIndex, Compute[T], Operation, ValueFormat) *series[T]
+type vSeriesFactory[T valueType] func(SeriesName, []DataRef, Compute[T], ValueFormat) *series[T]
 
 type cellFactory[T valueType] func([]ValueFormat) cell[T]
 
@@ -35,7 +33,7 @@ type Table[T valueType] struct {
 	data                [][]interface{}
 	dataHeaders         bool
 	registeredRCIndexes map[int]bool
-	registeredVIndexes  map[cellRecordKey]bool
+	registeredVIndexes  map[DataRef]bool
 	cells               map[string]map[string]cell[T]
 	filters             map[int]Filter
 	rowHeaders          *headers
@@ -71,7 +69,7 @@ func NewTable(data [][]interface{}, dataHeaders bool) *Table[float64] {
 		data:                data,
 		dataHeaders:         dataHeaders,
 		registeredRCIndexes: make(map[int]bool),
-		registeredVIndexes:  make(map[cellRecordKey]bool),
+		registeredVIndexes:  make(map[DataRef]bool),
 		cells:               make(map[string]map[string]cell[float64]),
 		filters:             make(map[int]Filter),
 		rowHeaders:          newRootHeaders(nil),
@@ -103,27 +101,17 @@ func (t *Table[T]) updateCell(rowLabel string, columnLabel string, record []inte
 		rc = t.newCell(displays)
 		rr[columnLabel] = rc
 	}
-	for k, _ := range t.registeredVIndexes {
-		rc.Record(k, record[k.dataIndex])
+	for k := range t.registeredVIndexes {
+		value, err := t.cellValue(record[k.index])
+		if err != nil {
+			return fmt.Errorf("while updating cell: %w", err)
+		}
+		rc.Record(k, value)
 	}
 	for is, serie := range t.valueSeries {
-		if (serie.compute != nil && onlyCompute) || (serie.compute == nil && !onlyCompute) {
-			switch serie.action {
-			case Count:
-				rc[is].AddValue(1)
-			case Sum:
-				value, err := computeFloatWithRecord(*serie, record)
-				if err != nil {
-					return fmt.Errorf("while updating cell [%q,%q] with record %v: %w", rowLabel, columnLabel, record, err)
-				}
-				rc[is].AddValue(value)
-			case set:
-				value, err := computeFloatWithCell(*serie, rc)
-				if err != nil {
-					return fmt.Errorf("while updating cell [%q,%q] with record %v: %w", rowLabel, columnLabel, record, err)
-				}
-				rc[is].SetValue(value)
-			}
+		err := rc.Set(is, serie.compute, serie.dataRefs)
+		if err != nil {
+			return fmt.Errorf("while updating cell: %w", err)
 		}
 	}
 	return nil
@@ -183,33 +171,17 @@ func (t *Table[T]) registerColumn(indexes []int, filter Filter, compute Compute[
 	return nil
 }
 
-func (t *Table[T]) registerValue(name string, indexes []int, compute Compute[T], operation Operation, format string) error {
-	if len(indexes) == 0 {
+func (t *Table[T]) registerValue(name string, dataRefs []DataRef, compute Compute[T], format string) error {
+	if len(dataRefs) == 0 {
 		return fmt.Errorf("invalid value definition, no indexes given")
 	}
-	if compute == nil && len(indexes) != 1 {
+	if compute == nil && len(dataRefs) != 1 {
 		return fmt.Errorf("invalid value definition, several indexes with no compute given")
 	}
-	if compute != nil {
-		for i := 0; i < len(indexes); i++ {
-			key := cellRecordKey{
-				dataIndex: indexes[i],
-				operation: Sum,
-			}
-			t.registeredVIndexes[key] = true
-		}
-	} else {
-		key := cellRecordKey{
-			dataIndex: indexes[0],
-			operation: operation,
-		}
-		t.registeredVIndexes[key] = true
+	for i := 0; i < len(dataRefs); i++ {
+		t.registeredVIndexes[dataRefs[i]] = true
 	}
-	dataIndexes := make([]DataIndex, len(indexes))
-	for i := 0; i < len(indexes); i++ {
-		dataIndexes[i] = DataIndex(indexes[i])
-	}
-	t.valueSeries = append(t.valueSeries, t.newVSeries(SeriesName(name), dataIndexes, compute, operation, ValueFormat(format)))
+	t.valueSeries = append(t.valueSeries, t.newVSeries(SeriesName(name), dataRefs, compute, ValueFormat(format)))
 	return nil
 }
 
@@ -337,16 +309,17 @@ func (t *Table[T]) ComputedColumn(indexes []int, filter Filter, compute Compute[
 	return t
 }
 
-func (t *Table[T]) Values(index int, operation Operation, display string) *Table[T] {
-	err := t.registerValue("", []int{index}, nil, operation, display)
+func (t *Table[T]) Values(index int, operation Operation, format string) *Table[T] {
+	dataRef := DataRef{index: index, operation: operation}
+	err := t.registerValue("", []DataRef{dataRef}, nil, format)
 	if t.err == nil {
 		t.err = err
 	}
 	return t
 }
 
-func (t *Table[T]) ComputedValues(name string, indexes []int, compute Compute[T], display string) *Table[T] {
-	err := t.registerValue(name, indexes, compute, none, display)
+func (t *Table[T]) ComputedValues(name string, dataRefs []DataRef, compute Compute[T], format string) *Table[T] {
+	err := t.registerValue(name, dataRefs, compute, format)
 	if t.err == nil {
 		t.err = err
 	}

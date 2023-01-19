@@ -60,9 +60,9 @@ func (h *headers) walk(label string) *headers {
 func (h *headers) labels(recursive bool, self bool) []string {
 	labels := make([]string, 0)
 	if h.elements != nil {
-		keys := make([]string, 0, len(h.elements))
+		keys := make([]Header, 0, len(h.elements))
 		for k := range h.elements {
-			keys = append(keys, k)
+			keys = append(keys, Header(k))
 		}
 		if h.actualSort != nil {
 			keys = h.actualSort(keys)
@@ -70,9 +70,9 @@ func (h *headers) labels(recursive bool, self bool) []string {
 			keys = h.defaultSort(keys)
 		}
 		for _, k := range keys {
-			labels = append(labels, h.elements[k].label)
+			labels = append(labels, h.elements[string(k)].label)
 			if recursive {
-				subLabels := h.elements[k].labels(recursive, false)
+				subLabels := h.elements[string(k)].labels(recursive, false)
 				if len(subLabels) > 0 {
 					labels = append(labels, subLabels...)
 				}

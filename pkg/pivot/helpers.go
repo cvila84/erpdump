@@ -25,66 +25,12 @@ func toFloat(element RawValue) (float64, error) {
 	return result, nil
 }
 
-func computeFloatWithCell(serie series[float64], cells []cell) (float64, error) {
-	var value float64
-	if serie.compute != nil {
-		var elements []interface{}
-		for _, i := range serie.indexes {
-			floatRecord, err := toFloat(record[i])
-			if err != nil {
-				elements = append(elements, record[i])
-			} else {
-				elements = append(elements, floatRecord)
-			}
-		}
-		var err error
-		value, err = serie.compute(elements)
-		if err != nil {
-			return 0, fmt.Errorf("while computing for %v: %w", elements, err)
-		}
-	} else {
-		var err error
-		value, err = toFloat(record[serie.indexes[0]])
-		if err != nil {
-			return 0, err
-		}
-	}
-	return value, nil
-}
-
-func computeFloatWithRecord(serie series[float64], record []interface{}) (float64, error) {
-	var value float64
-	if serie.compute != nil {
-		var elements []interface{}
-		for _, i := range serie.indexes {
-			floatRecord, err := toFloat(record[i])
-			if err != nil {
-				elements = append(elements, record[i])
-			} else {
-				elements = append(elements, floatRecord)
-			}
-		}
-		var err error
-		value, err = serie.compute(elements)
-		if err != nil {
-			return 0, fmt.Errorf("while computing for %v: %w", elements, err)
-		}
-	} else {
-		var err error
-		value, err = toFloat(record[serie.indexes[0]])
-		if err != nil {
-			return 0, err
-		}
-	}
-	return value, nil
-}
-
 func computeString(serie series[string], record []interface{}) (string, error) {
 	var value string
 	if serie.compute != nil {
-		var elements []interface{}
-		for _, i := range serie.indexes {
-			elements = append(elements, record[i])
+		var elements []RawValue
+		for _, dataRef := range serie.dataRefs {
+			elements = append(elements, record[dataRef.index])
 		}
 		var err error
 		value, err = serie.compute(elements)
@@ -93,7 +39,7 @@ func computeString(serie series[string], record []interface{}) (string, error) {
 		}
 	} else {
 		var ok bool
-		value, ok = record[serie.indexes[0]].(string)
+		value, ok = record[serie.dataRefs[0].index].(string)
 		if !ok {
 			value = fmt.Sprintf("%v", record[0])
 		}

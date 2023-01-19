@@ -5,30 +5,16 @@ import (
 	"strings"
 )
 
-type Operation int
-
-const (
-	none Operation = iota
-	Count
-	Sum
-)
-
-type cellRecordKey struct {
-	dataIndex int
-	operation Operation
-}
-
 type cell[T valueType] interface {
 	fmt.Stringer
-	Compute(index int, compute Compute[T], keys []cellRecordKey) error
-	Update(index int, key cellRecordKey)
+	Set(index int, compute Compute[T], keys []DataRef) error
 	Get() []T
-	Record(key cellRecordKey, value T)
+	Record(key DataRef, value T)
 }
 
 type pivotCell[T valueType] struct {
 	finalValues    []T
-	recordedValues map[cellRecordKey]T
+	recordedValues map[DataRef]T
 	formats        []string
 }
 
@@ -39,7 +25,7 @@ func newPivotCell(formats []ValueFormat) cell[float64] {
 	}
 	return &pivotCell[float64]{
 		finalValues:    make([]float64, len(formats)),
-		recordedValues: make(map[cellRecordKey]float64),
+		recordedValues: make(map[DataRef]float64),
 		formats:        valueFormats,
 	}
 }
@@ -61,25 +47,28 @@ func (p *pivotCell[T]) String() string {
 	}
 }
 
-func (p *pivotCell[T]) Compute(index int, compute Compute[T], keys []cellRecordKey) error {
-	var elements []RawValue
-	var err error
-	for _, k := range keys {
-		elements = append(elements, p.recordedValues[k])
+func (p *pivotCell[T]) Set(index int, compute Compute[T], keys []DataRef) error {
+	if compute != nil {
+		var elements []RawValue
+		var err error
+		for _, key := range keys {
+			elements = append(elements, p.recordedValues[key])
+		}
+		p.finalValues[index], err = compute(elements)
+		if err != nil {
+			return fmt.Errorf("while computing for %v: %w", elements, err)
+		}
+	} else {
+		p.finalValues[index] = p.recordedValues[keys[0]]
 	}
-	p.finalValues[index], err = compute(elements)
-	return err
-}
-
-func (p *pivotCell[T]) Update(index int, key cellRecordKey) {
-	p.finalValues[index] += p.recordedValues[key]
+	return nil
 }
 
 func (p *pivotCell[T]) Get() []T {
 	return p.finalValues
 }
 
-func (p *pivotCell[T]) Record(key cellRecordKey, value T) {
+func (p *pivotCell[T]) Record(key DataRef, value T) {
 	if key.operation == Sum {
 		p.recordedValues[key] += value
 	} else if key.operation == Count {

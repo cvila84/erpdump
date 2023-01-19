@@ -7,29 +7,29 @@ import (
 	"strings"
 )
 
-var AlphaSort Sort = func(elements []string) []string {
+var AlphaSort Sort = func(elements []Header) []Header {
 	less := func(i, j int) bool {
-		return strings.ToLower(elements[i]) < strings.ToLower(elements[j])
+		return strings.ToLower(string(elements[i])) < strings.ToLower(string(elements[j]))
 	}
 	sort.SliceStable(elements, less)
 	return elements
 }
 
-var ReverseAlphaSort Sort = func(elements []string) []string {
+var ReverseAlphaSort Sort = func(elements []Header) []Header {
 	less := func(i, j int) bool {
-		return strings.ToLower(elements[i]) > strings.ToLower(elements[j])
+		return strings.ToLower(string(elements[i])) > strings.ToLower(string(elements[j]))
 	}
 	sort.SliceStable(elements, less)
 	return elements
 }
 
-var MonthSort Sort = func(elements []string) []string {
+var MonthSort Sort = func(elements []Header) []Header {
 	months := []string{"Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"}
-	var result []string
+	var result []Header
 	k := 0
 	for i := 0; i < len(months); i++ {
 		for j := 0; j < len(elements); j++ {
-			if months[i] == elements[j] {
+			if string(months[i]) == string(elements[j]) {
 				result = append(result, elements[j])
 				k++
 				break
@@ -40,7 +40,7 @@ var MonthSort Sort = func(elements []string) []string {
 }
 
 var Group = func(groups [][]string, groupLabels []string, noneLabel string) Compute[string] {
-	return func(elements []interface{}) (string, error) {
+	return func(elements []RawValue) (string, error) {
 		for i, group := range groups {
 			for _, groupElement := range group {
 				e, ok := elements[0].(string)
@@ -56,7 +56,7 @@ var Group = func(groups [][]string, groupLabels []string, noneLabel string) Comp
 	}
 }
 
-var SumFloats Compute[float64] = func(elements []interface{}) (float64, error) {
+var SumFloats Compute[float64] = func(elements []RawValue) (float64, error) {
 	var result float64
 	for _, element := range elements {
 		f, ok := element.(float64)
@@ -69,7 +69,7 @@ var SumFloats Compute[float64] = func(elements []interface{}) (float64, error) {
 }
 
 var PartialSumFloats = func(sumGroup, groupSize int) Compute[float64] {
-	return func(elements []interface{}) (float64, error) {
+	return func(elements []RawValue) (float64, error) {
 		var result float64
 		for i, element := range elements {
 			e, ok := element.(float64)
@@ -85,7 +85,7 @@ var PartialSumFloats = func(sumGroup, groupSize int) Compute[float64] {
 }
 
 var In = func(list []string) Filter {
-	return func(element interface{}) bool {
+	return func(element RawValue) bool {
 		for _, e := range list {
 			if element == e {
 				return true

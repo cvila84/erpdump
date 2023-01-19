@@ -36,7 +36,7 @@ func GenerateFromEBSExport(csvDataFile, csvTablePath, csvTablePrefix string) err
 		ComputedColumn([]int{2}, nil, pivot.Group([][]string{otaProjects, functionalProjects}, []string{"OTA", "Functional"}, "Other"), pivot.AlphaSort).
 		Column(2).
 		//StandardColumn(3).
-		ComputedValues([]int{4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15}, pivot.SumFloats, pivot.Digits(1))
+		ComputedValues("MonthlyHours", pivot.DataRefs([]int{4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15}, pivot.Sum), pivot.SumFloats, pivot.Digits(1))
 	err = table.Generate()
 	if err != nil {
 		return err
@@ -74,9 +74,9 @@ func GenerateFromFinanceExport(csvDataFiles []string, csvTablePath, csvTablePref
 		Row(26).
 		ComputedRow([]int{32}, nil, nil, pivot.AlphaSort).
 		ComputedColumn([]int{3}, nil, monthlySplit, pivot.MonthSort).
-		ComputedValues([]int{40, 21}, dailyRate, pivot.Digits(1)).
-		Values(40, pivot.Sum).
-		Values(21, pivot.Sum)
+		Values(40, pivot.Sum, pivot.Digits(0)).
+		Values(21, pivot.Sum, pivot.Digits(0)).
+		ComputedValues("DailyRate", pivot.DataRefs([]int{40, 21}, pivot.Sum), dailyRate, pivot.Digits(0))
 	err := table.Generate()
 	if err != nil {
 		return err

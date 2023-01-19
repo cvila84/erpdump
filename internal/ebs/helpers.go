@@ -12,7 +12,7 @@ import (
 	"strings"
 )
 
-var monthlySplit pivot.Compute[string] = func(elements []interface{}) (string, error) {
+var monthlySplit pivot.Compute[string] = func(elements []pivot.RawValue) (string, error) {
 	e, ok := elements[0].(string)
 	if !ok {
 		return "", pivot.InvalidType(elements[0])
@@ -24,7 +24,7 @@ var monthlySplit pivot.Compute[string] = func(elements []interface{}) (string, e
 	return utils.Month(month), nil
 }
 
-var quaterlySplit pivot.Compute[string] = func(elements []interface{}) (string, error) {
+var quaterlySplit pivot.Compute[string] = func(elements []pivot.RawValue) (string, error) {
 	e, ok := elements[0].(string)
 	if !ok {
 		return "", pivot.InvalidType(elements[0])
@@ -36,7 +36,7 @@ var quaterlySplit pivot.Compute[string] = func(elements []interface{}) (string, 
 	return utils.Quarter(month), nil
 }
 
-var dailyRate pivot.Compute[float64] = func(elements []interface{}) (float64, error) {
+var dailyRate pivot.Compute[float64] = func(elements []pivot.RawValue) (float64, error) {
 	hours, ok := elements[0].(float64)
 	if !ok {
 		return 0, pivot.InvalidType(elements[0])
@@ -53,7 +53,7 @@ var dailyRate pivot.Compute[float64] = func(elements []interface{}) (float64, er
 }
 
 var projectGroups = func(prefixProject bool) pivot.Compute[string] {
-	return func(elements []interface{}) (string, error) {
+	return func(elements []pivot.RawValue) (string, error) {
 		e, ok := elements[0].(string)
 		if !ok {
 			return "", pivot.InvalidType(elements[0])

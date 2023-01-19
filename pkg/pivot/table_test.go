@@ -63,35 +63,34 @@ func TestTable(t *testing.T) {
 
 func TestComputeSet(t *testing.T) {
 	rawData := [][]interface{}{
-		{"A", "B", "V1", "V2"},
-		{"A1", "B1", 4, 6},
-		{"A1", "B1", 8, 5},
-		{"A1", "B2", 4, 2},
+		{"A", "B", "V1", "V2", "V3", "V4"},
+		{"A1", "B1", 6, 2, 3, 5},
+		{"A1", "B1", 4, 3, 1, 2},
+		{"A1", "B2", 9, 3, 4, 3},
 	}
-	compute := func(elements []interface{}) (float64, error) {
+	/*
+		   B1      B2    T
+		A1 2;1,4;4 1;1;4 3;1,25;8
+		T  2;1,4;4 1;1;4 3;1,25;8
+
+		   B1                B2                T
+		   c(V2) V4/V2 s(V3) c(V2) V4/V2 s(V3) c(V2) V4/V2 s(V3)
+		A1 2     1,4   4     1     1     4     3     1,25  8
+		T  2     1,4   4     1     1     4     3     1,25  8
+
+	*/
+	compute := func(elements []RawValue) (float64, error) {
 		return (elements[0].(float64)) / (elements[1].(float64)), nil
 	}
 	table := NewTable(rawData, true).
 		Row(0).
 		Column(1).
-		ComputedValues([]int{3, 2}, compute, Digits(2)).
-		Values(3, Sum, Digits(0))
+		Values(3, Count, Digits(0)).
+		ComputedValues("V4/V2", DataRefs([]int{5, 3}, Sum), compute, Digits(2)).
+		Values(4, Sum, Digits(0))
 	err := table.Generate()
 	if err != nil {
 		t.Fatalf("%s", err)
 	}
 	fmt.Println(table.ToCSV())
 }
-
-//cells         map[string]map[string][]cell
-//rowHeaders    *headers
-//columnHeaders *headers
-//rowSeries     []*series[string]
-//columnSeries  []*series[string]
-//valueSeries   []*series[float64]
-
-//indexes       map[int]int
-// 0 => 0
-// 1 => 0
-// 2 => 0
-// 3 => 1
