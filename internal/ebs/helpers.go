@@ -136,6 +136,26 @@ func parseProjectID(projectName string) string {
 	return "N/A"
 }
 
+func filesToRawData(csvDataFiles []string) ([][]interface{}, error) {
+	var rawData [][]interface{}
+	for i, csvDataFile := range csvDataFiles {
+		data, err := readCsvFile(csvDataFile)
+		if err != nil {
+			return nil, fmt.Errorf("while reading %q: %w", csvDataFile, err)
+		}
+		for j, record := range data {
+			if i == 0 || j > 0 {
+				rawRecord := make([]interface{}, len(record))
+				for j := 0; j < len(record); j++ {
+					rawRecord[j] = record[j]
+				}
+				rawData = append(rawData, rawRecord)
+			}
+		}
+	}
+	return rawData, nil
+}
+
 func readCsvFile(filePath string) ([][]string, error) {
 	f, err := os.Open(filePath)
 	defer f.Close()

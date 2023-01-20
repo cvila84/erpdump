@@ -8,7 +8,7 @@ func main() {
 	if err := ebs.GenerateFromEBSExport("./erp-2022.csv", "./", "erp-2022-pivot"); err != nil {
 		panic(err)
 	}
-	if err := ebs.GenerateFromFinanceExport([]string{"./budget-2022.csv", "./budgetl3-2022.csv"}, "./", "budget-2022-pivot"); err != nil {
+	if err := ebs.GenerateFromFinanceExport([]string{"./budget-rd-2022.csv", "./budget-l3-2022.csv"}, "./", "pivot-budget-2022"); err != nil {
 		panic(err)
 	}
 }

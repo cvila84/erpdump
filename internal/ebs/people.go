@@ -1,40 +1,43 @@
 package ebs
 
 /*
-Delta with baseline/forecast: +1 SM in Praha agreed by Mauricio [R1R29750]
-Delta with baseline/forecast: +2 ppl in Noida agreed by Mauricio to compensate turn-overs [R1R29750]
-Delta with baseline/forecast: Praha new infrastructure agreed by ? [R1R29751]
-Delta with baseline/forecast: QA black raised 800$/month of AWS costs agreed by ? [R1R29751]
-Delta with baseline/forecast: +1 ppl (13->14) for AOTA L3 agreed by Mauricio [R0S29752]
+2022 Delta with baseline/forecast: +1 SM in Praha agreed by Mauricio [R1R29750]
+2022 Delta with baseline/forecast: +2 ppl in Noida agreed by Mauricio to compensate turn-overs [R1R29750]
+2022 Delta with baseline/forecast: Praha new infrastructure agreed by David/Guillaume [R1R29751]
+2022 Delta with baseline/forecast: QA black raised 800$/month of AWS costs agreed by Mauricio [R1R29751]
+2022 Delta with baseline/forecast: +1 ppl (13->14) for AOTA L3 agreed by Mauricio [R0S29752]
+2022 Delta with baseline/forecast: SII budget for OTA-BE & trainings approved by Nagy [R1R29750]
+
+2023 Delta with baseline/forecast: NFV improvements NOT APPROVED YET [R1R29750], inputs made by Daniel
 */
 
 // Delta with baseline/forecast: TLS 1.3 development (93md on waf+psk-provider) approved by Nagy [R1R29750]
 var ext29750Tls13People = [][]string{
 	{"Bretagne,Eric", "Bretagne Eric"},
-	{"", "Oumohand Rachid"},
-	{"", "Kumar Singh Shishir"},
+	{"Oumohand,Rachid", "Oumohand Rachid"},
+	{"Kumar Singh,Shishir", "Kumar Singh Shishir"},
 }
 
 // Delta with baseline/forecast: NGM-Datadog migration agreed by Mauricio [R1R29750]
 var ext29750NgmMigrationPeople = [][]string{
-	{"", "Toschi Guilherme"},
+	{"Toschi,Guilherme", "Toschi Guilherme"}, // previous manager Aroua,Adnen
 }
 
 // Delta with baseline/forecast: New refresh applet, MIV2 study for NB-IOT, Applet study to transform 4G card into 5G agreed by Nagy [R1R29750]
 var ext29750NewAppletsPeople = [][]string{
-	{"", "Abao Michael Carlo"},
-	{"", "Giva Joana Marie"},
-	{"", "Marquez Justin"},
+	{"Abao,Michael Carlo", "Abao Michael Carlo"},
+	{"Giva,Joana Marie", "Giva Joana Marie"},
+	{"Marquez,Justin", "Marquez Justin"},
 }
 
 // Delta with baseline/forecast: MyOSD team contribution [R1R29750]
 var ext29750MyosdTeamPeople = [][]string{
-	{"", "Navarrete Perez Hector Luis"},
+	{"Navarrete Perez,Hector Luis", "Navarrete Perez Hector Luis"},
 }
 
 // Delta with baseline/forecast: OTA demo tenant approved by Jérome Voyer [R1R29751]
 var ext29751OtaDemoTenantPeople = [][]string{
-	{"", "Virmani Karan"},
+	{"Virmani,Karan", "Virmani Karan"},
 }
 
 // Delta with baseline/forecast: European digital wallet agreed by Samir Khlif (IBS) [R1R29753]
@@ -45,12 +48,12 @@ var ext29753DigitalWalletPeople = [][]string{
 
 // Delta with baseline/forecast: Private Network and xRIM aaS agreed by Mauricio [R1R29753]
 var ext29753privateNetworkPeople = [][]string{
-	{"", "Prigent Francois"},
+	{"Prigent,Francois", "Prigent Francois"},
 }
 
 // Delta with baseline/forecast: Transatel DP+ flow activation for 3k€ [R1R30027]
 var ext30027transatelActPeople = [][]string{
-	{"", "Ayasse Jerome"},
+	{"Ayasse,Jerome", "Ayasse Jerome"},
 }
 
 // R0R29805 Central R&D
@@ -75,26 +78,26 @@ var centralRDPeople = [][]string{
 // R0T30005 Transversal
 // 478k€
 var transversalPeople = [][]string{
-	{"", "Almanza Roman Ines Atenea"},
+	{"Almanza Roman,Ines Atenea", "Almanza Roman Ines Atenea"},
 	{"Bretagne,Eric", "Bretagne Eric"},
-	{"", "Dubuc Laurent"},
-	{"", "Garduno Sanchez Victor Hugo"},
-	{"", "Gulyani Sahil"},
-	{"", "Huerta martinez Jesus"},
-	{"", "Kumar Pramod"},
+	{"Dubuc,Laurent", "Dubuc Laurent"},
+	{"Garduno Sanchez,Victor Hugo", "Garduno Sanchez Victor Hugo"},
+	{"Gulyani,Sahil", "Gulyani Sahil"},
+	{"Huerta martinez,Jesus", "Huerta martinez Jesus"},
+	{"Kumar,Pramod", "Kumar Pramod"},
 	{"Kumar,Vivek", "Kumar Vivek"},
-	{"", "Loos Michel"},
-	{"", "Manchanda Jatin"},
-	{"", "Patel Kamal"},
-	{"", "Prakash Virender"},
-	{"", "Prigent Francois"},
-	{"", "Qualizza Michele"},
-	{"", "Singh Alok"},
-	{"", "Singh Chandan Kumar"},
-	{"", "Singh Gaurav"},
-	{"", "Tcherniack Laurent"},
-	{"", "Tovar Jonathan Josué"},
-	{"", "Yadav Sanjeet"},
+	{"Loos,Michel", "Loos Michel"},
+	{"Manchanda,Jatin", "Manchanda Jatin"},
+	{"Patel,Kamal", "Patel Kamal"},
+	{"Prakash,Virender", "Prakash Virender"},
+	{"Prigent,Francois", "Prigent Francois"},
+	{"Qualizza,Michele", "Qualizza Michele"},
+	{"Singh,Alok", "Singh Alok"},
+	{"Singh,Chandan Kumar", "Singh Chandan Kumar"},
+	{"Singh,Gaurav", "Singh Gaurav"},
+	{"Tcherniack,Laurent", "Tcherniack Laurent"},
+	{"Tovar,Jonathan Josué", "Tovar Jonathan Josué"},
+	{"Yadav,Sanjeet", "Yadav Sanjeet"},
 }
 
 // R0R29754 Improvement
@@ -110,12 +113,12 @@ var improvmentOtherPeople = [][]string{
 	{"Berard,Xavier", "Berard Xavier"},
 	{"Cerny,Jaroslav", "Cerny Jaroslav"},
 	{"Gattone,Alain", "Gattone Alain"},
-	{"", "Halagunde Vinayak Punja"},
-	{"", "Marciniak Mateusz"},
-	{"", "Rajput Yashwant Singh"},
-	{"", "Rana Ritika"},
-	{"", "Ververis Konstantinos"},
-	{"", "Vikas Vikas"},
+	{"Halagunde,Vinayak Punja", "Halagunde Vinayak Punja"},
+	{"Marciniak,Mateusz", "Marciniak Mateusz"},
+	{"Rajput,Vikash Kumar", "Rajput Yashwant Singh"},
+	{"Rana,Ritika", "Rana Ritika"},
+	{"Ververis,Konstantinos", "Ververis Konstantinos"},
+	{"Vikas,Vikas", "Vikas Vikas"},
 }
 
 // R1R29753 Innovation
@@ -123,25 +126,24 @@ var improvmentOtherPeople = [][]string{
 // Kriss: 3971h / 413977€
 // Vertical: 3740h / 389895€
 var innovationBudgetPeople = [][]string{
-	{"", "Abao Michael Carlo"},
-	{"", "ABAO MICHAEL CARLO"},
+	{"Abao,Michael Carlo", "Abao Michael Carlo"},
 	{"Bretagne,Eric", "Bretagne Eric"},
-	{"", "Castano Esteban"},
+	{"Castano,Esteban", "Castano Esteban"},
 	{"Cerny,Jaroslav", "Cerny Jaroslav"},
 	{"Deepak,Deepak", "Deepak Deepak"},
 	{"Dhondiyal,Rituraj", "Dhondiyal Rituraj"},
-	{"", "Eleserio Ederlyn"},
-	{"", "Freimonas Romas"},
-	{"", "Giva Joana Marie"},
-	{"", "Kobr Dan"}, // KMT
+	{"Eleserio,Ederlyn", "Eleserio Ederlyn"},
+	{"Freimonas,Romas", "Freimonas Romas"},
+	{"Giva,Joana Marie", "Giva Joana Marie"},
+	{"Kobr,Dan", "Kobr Dan"}, // KMT
 	{"Kumar,Anshuman", "Kumar Anshuman"},
 	{"Lachowicz,Daniel", "Lachowicz Daniel"},
-	{"", "LAI SER WEI"},
-	{"", "Marquez Justin"},
-	{"", "Miani Alberto"}, // KMT
-	{"", "ONG WILSON LEE"},
-	{"", "Sharma Gaurav"},
-	{"", "Virmani Karan"},
+	{"LAI,SER WEI", "LAI SER WEI"},
+	{"Marquez,Justin", "Marquez Justin"},
+	{"Miani,Alberto", "Miani Alberto"}, // KMT
+	{"ONG,WILSON LEE", "ONG WILSON LEE"},
+	{"Sharma,Gaurav", "Sharma Gaurav"},
+	{"Virmani,Karan", "Virmani Karan"},
 }
 var innovationOtherPeople = [][]string{}
 
@@ -178,10 +180,10 @@ var aotaL3OtherPeople = [][]string{
 	{"Dubey,Parul", "Dubey Parul"},
 	{"GOYAL,JAIDEV", "GOYAL JAIDEV"},
 	{"Gupta,Swati", "Gupta Swati"},
-	{"", "Kalra Prashant"},
+	{"Kalra,Prashant", "Kalra Prashant"},
 	{"KUMAR,Rahul", "KUMAR Rahul"},
 	{"Martinez Carino,Conrado", "Martinez Carino Conrado"},
-	{"", "Ocampo Gonzalez Francisco Javier"},
+	{"Ocampo Gonzalez,Francisco Javier", "Ocampo Gonzalez Francisco Javier"},
 	{"Perez Cuellar,Julio Cesar", "Perez Cuellar Julio Cesar"},
 	{"SAHADEVAN,SANU", "SAHADEVAN SANU"},
 	{"Srivastava,Sahil", "Srivastava Sahil"},
@@ -213,31 +215,34 @@ var cotaPtfBudgetPeople = [][]string{
 	{"Lachowicz,Daniel", "Lachowicz Daniel"},
 	{"Przytarski,Bartlomiej", "Przytarski Bartlomiej"},
 	{"Sedlacek,Ondrej", "Sedlacek Ondrej"},
+	// New in 2023, exact labels to check on ERP and finance extract
+	{"BHATNAGAR, AAKARSH", "BHATNAGAR AAKARSH"},
+	{"Halagunde,Vinayak Punja", "Halagunde Vinayak Punja"},
 }
 var cotaPtfOtherPeople = [][]string{
-	{"", "Aguilera Palomino Diego"}, // support from deployment team
-	{"", "Alarcon galvez Fernando"}, // support from deployment team
+	{"Aguilera Palomino,Diego", "Aguilera Palomino Diego"}, // support from deployment team
+	{"Alarcon galvez,Fernando", "Alarcon galvez Fernando"}, // support from deployment team
 	//{"Bories,Clement", "Bories Clement"},
 	{"BHATNAGAR,AAKARSH", "BHATNAGAR AAKARSH"}, // newcomer to replace budgeted resource
 	{"Bretagne,Eric", "Bretagne Eric"},         // KMT
 	//{"Cabrera,Marcos", "Cabrera Marcos"},
-	{"", "Castano Esteban"},                                // support from L2
+	{"Castano,Esteban", "Castano Esteban"},                 // support from L2
 	{"Cerny,Jaroslav", "Cerny Jaroslav"},                   // KMT
 	{"Delgado martinez,Alvaro", "Delgado martinez Alvaro"}, // KMT
 	{"Fioux,Sebastien", "Fioux Sebastien"},                 // SaaS platform team SM
-	{"", "Freimonas Romas"},                                // KMT
-	{"", "Galindo Gomez Jorge"},                            // ?
+	{"Freimonas,Romas", "Freimonas Romas"},                 // KMT
+	{"Galindo Gomez,Jorge", "Galindo Gomez Jorge"},         // ?
 	{"Gukanti,Sandeep", "Gukanti Sandeep"},                 // support from deployment team
-	{"", "Jones Terence"},                                  // support from DB expert team
+	{"Jones,Terence", "Jones Terence"},                     // support from DB expert team
 	{"Kumar,Anshuman", "Kumar Anshuman"},                   // support from deployment team
 	{"Letolle,Nicolas", "Letolle Nicolas"},                 // support from deployment team
 	{"LIM, Mr BERNARD KENNETH", "LIM BERNARD KENNETH"},     // support from DB expert team
-	{"", "Nandiraju Pavan Kumar"},                          // ?
-	{"", "Perez Lagunas Daniela"},                          // support from MyOSD team
+	{"Nandiraju,Pavan Kumar", "Nandiraju Pavan Kumar"},     // support from DB expert team
+	{"Perez Lagunas,Daniela", "Perez Lagunas Daniela"},     // support from MyOSD team
 	{"Schammass,Alexandre", "Schammass Alexandre"},         // support from deployment team
 	{"Sharma,Aditya", "Sharma Aditya"},                     // newcomer to replace budgeted resource
-	{"", "Sharma Gaurav"},                                  // deployment/platform team manager
-	{"", "Valette Karine"},                                 // support from DB expert team
+	{"Sharma,Gaurav", "Sharma Gaurav"},                     // deployment/platform team manager
+	{"Valette,Karine", "Valette Karine"},                   // support from DB expert team
 }
 
 // R1R29750 COTA Dev
@@ -336,7 +341,7 @@ var cotaDevL3BudgetPeople = [][]string{
 	{"VOHRA,Mitali", "VOHRA Mitali"},
 	// VM/CZ
 	{"Dokladal,Jakub", "Dokladal Jakub"},
-	{"", "Fedai Artem"},
+	{"Fedai,Artem", "Fedai Artem"},
 	{"Lachowicz,Daniel", "Lachowicz Daniel"},
 	{"Przytarski,Bartlomiej", "Przytarski Bartlomiej"},
 	{"Sedlacek,Ondrej", "Sedlacek Ondrej"},
@@ -353,22 +358,22 @@ var cotaDevL3OtherPeople = [][]string{
 // Vertical: 748h / 35998€
 var tacBudgetPeople = [][]string{
 	// Applet
-	{"", "Abao Michael Carlo"},
-	{"", "ONG WILSON LEE"},
+	{"Abao,Michael Carlo", "Abao Michael Carlo"},
+	{"ONG,WILSON LEE", "ONG WILSON LEE"},
 	// Server
 }
 var tacOtherPeople = [][]string{
 	// Applet
-	{"", "Eleserio Ederlyn"},
-	{"", "Shamsudin Nurrasyidah"},
+	{"Eleserio,Ederlyn", "Eleserio Ederlyn"},
+	{"Shamsudin,Nurrasyidah", "Shamsudin Nurrasyidah"},
 	// Server
-	{"", "Dumitrescu Florin"},      // support from ODC
-	{"Gupta,Ankur", "Gupta Ankur"}, // server development was not in budget
+	{"Dumitrescu,Florin", "Dumitrescu Florin"},                                   // support from ODC
+	{"Gupta,Ankur", "Gupta Ankur"},                                               // server development was not in budget
 	{"Hernandez Castaneda,Jose Guillermo", "Hernandez Castaneda Jose Guillermo"}, // support from SSC
-	{"", "Myslivets Alexey"},               // support from ODC
-	{"", "Shevnin Ignat"},                  // support from ODC
-	{"Singh,Gurvinder", "Singh Gurvinder"}, // server development was not in budget
-	{"Singhal,Shivank", "Singhal Shivank"}, // server development was not in budget
+	{"Myslivets,Alexey", "Myslivets Alexey"},                                     // support from ODC
+	{"Shevnin,Ignat", "Shevnin Ignat"},                                           // support from ODC
+	{"Singh,Gurvinder", "Singh Gurvinder"},                                       // server development was not in budget
+	{"Singhal,Shivank", "Singhal Shivank"},                                       // server development was not in budget
 }
 
 // R1R30028 IOT Dev
@@ -396,9 +401,11 @@ var iotOtherPeople = [][]string{
 	{"", "Yadav Sanjeet"},
 }
 
-var managers = []string{
+var cotaManagers = []string{
 	"Pereira Carrari, Mr Mauricio",
 	"Letolle,Nicolas",
+	"Candillier,Christophe Pierre Alphonse",
+	"Kadanik,Jiri",
 	"Vila,Christophe",
 	"Kumar,Vikash",
 	"Franco Mora,Richard Miguel",
@@ -410,6 +417,22 @@ var managers = []string{
 	"Gupta,Anshul",
 	"Kumar,Vivek",
 }
+
+var aotaManagers = []string{
+	// malik nauman => omar gustavo alvirde sierra =>
+	"Cavalier,Laurent",
+	"Sharma,Amitabh Prakash",
+}
+
+var otherManagers = []string{
+	// MCS server (gorse)
+	"Leclercq,Frederic", // covers "Mercier,Frederic"
+	"Hourcadette,Sandrine",
+	// MCS applet (grellier)
+	"Lam,Ching Yan",
+}
+
+// Toschi,Guilherme previous managers :
 
 type projectCostType struct {
 	budget    []string
@@ -425,10 +448,14 @@ func init() {
 	verbose := false
 	projectsTeamWorkload = make(map[string]projectCostType)
 	projectsOtherCosts = make(map[string]projectCostType)
+	//projectsTeamWorkload["R1R29750"] = projectCostType{
+	//	budget:    uniquePeople(verbose, 1, aotaDevBudgetPeople, cotaDevL3BudgetPeople),
+	//	extension: uniquePeople(verbose, 1, ext29750MyosdTeamPeople, ext29750Tls13People, ext29750NewAppletsPeople, ext29750NgmMigrationPeople),
+	//	other:     uniquePeople(verbose, 1, aotaDevOtherPeople, cotaDevL3OtherPeople),
+	//}
 	projectsTeamWorkload["R1R29750"] = projectCostType{
-		budget:    uniquePeople(verbose, 1, aotaDevBudgetPeople, cotaDevL3BudgetPeople),
-		extension: uniquePeople(verbose, 1, ext29750MyosdTeamPeople, ext29750Tls13People, ext29750NewAppletsPeople, ext29750NgmMigrationPeople),
-		other:     uniquePeople(verbose, 1, aotaDevOtherPeople, cotaDevL3OtherPeople),
+		budget:    uniquePeople(verbose, 1, cotaDevL3BudgetPeople, ext29750MyosdTeamPeople, ext29750Tls13People, ext29750NewAppletsPeople, ext29750NgmMigrationPeople),
+		extension: uniquePeople(verbose, 1, aotaL3BudgetPeople, aotaL3OtherPeople, aotaDevBudgetPeople, aotaDevOtherPeople),
 	}
 	projectsOtherCosts["R1R29750"] = projectCostType{
 		budget: []string{Recharge},
@@ -438,9 +465,13 @@ func init() {
 		extension: uniquePeople(verbose, 1, ext29751OtaDemoTenantPeople),
 		other:     uniquePeople(verbose, 1, cotaPtfOtherPeople),
 	}
+	//projectsTeamWorkload["R0S29752"] = projectCostType{
+	//	budget: uniquePeople(verbose, 1, aotaL3BudgetPeople, cotaDevL3BudgetPeople),
+	//	other:  uniquePeople(verbose, 1, aotaL3OtherPeople, cotaDevL3OtherPeople),
+	//}
 	projectsTeamWorkload["R0S29752"] = projectCostType{
-		budget: uniquePeople(verbose, 1, aotaL3BudgetPeople, cotaDevL3BudgetPeople),
-		other:  uniquePeople(verbose, 1, aotaL3OtherPeople, cotaDevL3OtherPeople),
+		budget:    uniquePeople(verbose, 1, cotaDevL3BudgetPeople),
+		extension: uniquePeople(verbose, 1, aotaL3BudgetPeople, aotaL3OtherPeople, aotaDevBudgetPeople, aotaDevOtherPeople),
 	}
 	projectsTeamWorkload["R1R29753"] = projectCostType{
 		budget:    uniquePeople(verbose, 1, innovationBudgetPeople),
