@@ -54,47 +54,31 @@ var dailyRate pivot.Compute[float64] = func(elements []pivot.RawValue) (float64,
 
 var projectGroups = func(prefixProject bool) pivot.Compute[string] {
 	return func(elements []pivot.RawValue) (string, error) {
-		e, ok := elements[0].(string)
+		project, ok := elements[0].(string)
 		if !ok {
 			return "", pivot.InvalidType(elements[0])
 		}
 		var prefix string
 		if prefixProject {
-			prefix = e + "-"
+			prefix = project + "-"
 		}
-		teamWorkload, ok := projectsTeamWorkload[e]
+		teamWorkload, ok := projectsTeamWorkload[project]
 		if ok {
-			for _, p := range teamWorkload.budget {
-				if p == elements[1] && Workload == elements[2] {
-					return prefix + "Budget", nil
-				}
-			}
-			for _, p := range teamWorkload.extension {
-				if p == elements[1] && Workload == elements[2] {
-					return prefix + "Extension", nil
-				}
-			}
-			for _, p := range teamWorkload.other {
-				if p == elements[1] && Workload == elements[2] {
-					return prefix + "Other", nil
+			for k, v := range teamWorkload {
+				for _, p := range v {
+					if p == elements[1] && Workload == elements[2] {
+						return prefix + k, nil
+					}
 				}
 			}
 		}
-		otherCosts, ok := projectsOtherCosts[e]
+		otherCosts, ok := projectsOtherCosts[project]
 		if ok {
-			for _, p := range otherCosts.budget {
-				if p == elements[2] {
-					return prefix + "Budget", nil
-				}
-			}
-			for _, p := range otherCosts.extension {
-				if p == elements[2] {
-					return prefix + "Extension", nil
-				}
-			}
-			for _, p := range otherCosts.other {
-				if p == elements[2] {
-					return prefix + "Other", nil
+			for k, v := range otherCosts {
+				for _, p := range v {
+					if p == elements[2] {
+						return prefix + k, nil
+					}
 				}
 			}
 		}
@@ -205,11 +189,11 @@ func saveCsvFile(filePath string, csvData string) error {
 // record[2]=employee
 // record[3]=manager
 // record[4-15]=hours(monthly)
-func groupEBSTimeCardsByMonth(csvData [][]string, verbose bool) ([][]interface{}, error) {
+func groupEBSTimeCardsByMonth(csvData [][]interface{}, verbose bool) ([][]interface{}, error) {
 	tams := map[string]*timeAndMaterial{}
 	for _, record := range csvData {
-		project := parseProjectID(record[9])
-		employee := strings.TrimSpace(record[1])
+		project := parseProjectID(record[9].(string))
+		employee := strings.TrimSpace(record[1].(string))
 		month, monthHours, nextMonthHours, err := monthlyHours(record)
 		if err != nil {
 			return nil, fmt.Errorf("cannot parse week hour fields %v: %w", record, err)
@@ -225,7 +209,7 @@ func groupEBSTimeCardsByMonth(csvData [][]string, verbose bool) ([][]interface{}
 			tam = &timeAndMaterial{}
 			tams[project] = tam
 		}
-		tam.AddWorkload(record[10], employee, record[0], month, monthHours, nextMonthHours, 0)
+		tam.AddWorkload(record[10].(string), employee, record[0].(string), month, monthHours, nextMonthHours, 0)
 	}
 
 	var fillRecord = func(employee, manager, project, task string, hours []float64) []interface{} {

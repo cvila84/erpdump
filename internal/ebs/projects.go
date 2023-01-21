@@ -1,8 +1,14 @@
 package ebs
 
 var Workload = "Workload"
-var Travel = "Temps & agency costs"
+var Travel = "Travel & entertainment"
+var Agency = "Temps & agency costs"
 var Recharge = "Allocations & recharges mgmt"
+var Employee = "Employee-related"
+var Datacenter = "DC Cost"
+var OpsCosts = "Operating costs"
+var ProFees = "Professional fees"
+var Facilities = "Facilities"
 
 var otaProjects = []string{
 	"R1R29750",

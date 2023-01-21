@@ -69,13 +69,13 @@ func (t *timeAndMaterial) AddCosts(taskName, category string, month int, costsIn
 	costs[month-1] += costsInMonth
 }
 
-func weeklyHours(record []string) ([]float64, error) {
+func weeklyHours(record []interface{}) ([]float64, error) {
 	var hours []float64
 	for j := 12; j < 17; j++ {
 		var hour float64
 		var err error
-		if len(record[j]) > 0 {
-			hour, err = strconv.ParseFloat(record[j], 32)
+		if len(record[j].(string)) > 0 {
+			hour, err = strconv.ParseFloat(record[j].(string), 32)
 			if err != nil {
 				return nil, err
 			}
@@ -87,8 +87,8 @@ func weeklyHours(record []string) ([]float64, error) {
 	return hours, nil
 }
 
-func monthlyHours(record []string) (int, float64, float64, error) {
-	startDay, startMonth, startYear, err := utils.ParseDateDDsMMMsYYYY(record[6])
+func monthlyHours(record []interface{}) (int, float64, float64, error) {
+	startDay, startMonth, startYear, err := utils.ParseDateDDsMMMsYYYY(record[6].(string))
 	if err != nil {
 		return 0, 0, 0, err
 	}

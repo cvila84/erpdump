@@ -6,10 +6,10 @@ import (
 	"path/filepath"
 )
 
-func GenerateFromEBSExport(csvDataFile, csvTablePath, csvTablePrefix string) error {
-	data, err := readCsvFile(csvDataFile)
+func GenerateFromEBSExport(csvDataFiles []string, csvTablePath, csvTablePrefix string) error {
+	data, err := filesToRawData(csvDataFiles)
 	if err != nil {
-		return fmt.Errorf("while reading %q: %w", csvDataFile, err)
+		return fmt.Errorf("while reading %v: %w", csvDataFiles, err)
 	}
 	// record[0]=manager
 	// record[1]=employee
@@ -47,7 +47,7 @@ func GenerateFromEBSExport(csvDataFile, csvTablePath, csvTablePrefix string) err
 func GenerateFromFinanceExport(csvDataFiles []string, csvTablePath, csvTablePrefix string) error {
 	pivotData, err := filesToRawData([]string{csvDataFiles[0]})
 	if err != nil {
-		return err
+		return fmt.Errorf("while reading %v: %w", csvDataFiles, err)
 	}
 	// record[3]=month (yyyy-mm)
 	// record[14]=project
