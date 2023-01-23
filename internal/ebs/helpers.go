@@ -62,7 +62,7 @@ var projectGroups = func(prefixProject bool) pivot.Compute[string] {
 		if prefixProject {
 			prefix = project + "-"
 		}
-		teamWorkload, ok := projectsTeamWorkload[project]
+		teamWorkload, ok := projectsWorkloadSplit[project]
 		if ok {
 			for k, v := range teamWorkload {
 				for _, p := range v {
@@ -72,7 +72,7 @@ var projectGroups = func(prefixProject bool) pivot.Compute[string] {
 				}
 			}
 		}
-		otherCosts, ok := projectsOtherCosts[project]
+		otherCosts, ok := projectOtherCostsSplit[project]
 		if ok {
 			for k, v := range otherCosts {
 				for _, p := range v {
@@ -96,7 +96,7 @@ func uniquePeople(verbose bool, index int, peopleLists ...[][]string) []string {
 					if l2[index] == p {
 						present = true
 						if verbose {
-							fmt.Printf("WARNING: duplicated people detected: %q\n", p)
+							fmt.Printf("WARNING: duplicated people %q detected in %v\n", p, l1)
 						}
 					}
 				}
@@ -179,7 +179,7 @@ func saveCsvFile(filePath string, csvData string) error {
 // groupEBSTimeCardsByMonth
 // record[0]=manager
 // record[1]=employee
-// record[6]=hours
+// record[6]=date
 // record[9]=project
 // record[10]=task
 // record[12-17]=hours(weekly)
@@ -188,7 +188,8 @@ func saveCsvFile(filePath string, csvData string) error {
 // record[1]=task
 // record[2]=employee
 // record[3]=manager
-// record[4-15]=hours(monthly)
+// record[4]=month (yyyy-mm)
+// record[5]=hours
 func groupEBSTimeCardsByMonth(csvData [][]interface{}, verbose bool) ([][]interface{}, error) {
 	tams := map[string]*timeAndMaterial{}
 	for _, record := range csvData {
@@ -212,32 +213,13 @@ func groupEBSTimeCardsByMonth(csvData [][]interface{}, verbose bool) ([][]interf
 		tam.AddWorkload(record[10].(string), employee, record[0].(string), month, monthHours, nextMonthHours, 0)
 	}
 
-	var fillRecord = func(employee, manager, project, task string, hours []float64) []interface{} {
-		record := make([]interface{}, 16)
-		record[0] = project
-		record[1] = task
-		record[2] = employee
-		record[3] = manager
-		record[4] = hours[0]
-		record[5] = hours[1]
-		record[6] = hours[2]
-		record[7] = hours[3]
-		record[8] = hours[4]
-		record[9] = hours[5]
-		record[10] = hours[6]
-		record[11] = hours[7]
-		record[12] = hours[8]
-		record[13] = hours[9]
-		record[14] = hours[10]
-		record[15] = hours[11]
-		return record
-	}
-
 	var rawData [][]interface{}
 	for project, tam := range tams {
 		for task, entry := range tam.entries {
 			for employee, workload := range entry.workload {
-				rawData = append(rawData, fillRecord(employee, workload.manager, project, task, workload.hours))
+				for month, hours := range workload.hours {
+					rawData = append(rawData, []interface{}{project, task, employee, workload.manager, utils.ToDateYYYYsMM(month+1, 2022), hours})
+				}
 			}
 		}
 	}

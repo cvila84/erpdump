@@ -1,17 +1,9 @@
 package ebs
 
-/*
-2022 Delta with baseline/forecast: +1 SM in Praha agreed by Mauricio [R1R29750]
-2022 Delta with baseline/forecast: +2 ppl in Noida agreed by Mauricio to compensate turn-overs [R1R29750]
-2022 Delta with baseline/forecast: SII budget for OTA-BE & trainings approved by Nagy [R1R29750]
-2022 Delta with baseline/forecast: Praha new infrastructure agreed by David/Guillaume [R1R29751]
-2022 Delta with baseline/forecast: QA black raised 800$/month of AWS costs agreed by Mauricio [R1R29751]
-2022 Delta with baseline/forecast: +1 ppl (13->14) for AOTA L3 agreed by Mauricio [R0S29752]
-2022 Virtual BW used for: European digital wallet agreed by Samir Khlif (IBS) [R1R29753]
-2022 Virtual BW used for: Private Network and xRIM aaS agreed by Mauricio [R1R29753]
-
-2023 Delta with baseline/forecast: NFV improvements NOT APPROVED [R1R29750], inputs made by Daniel
-*/
+import (
+	"fmt"
+	"github.com/cvila84/erpdump/pkg/pivot"
+)
 
 // --- R0R29805 Central R&D
 var centralRDPeople = [][]string{
@@ -188,17 +180,19 @@ var cotaDevL3BudgetPeople = [][]string{
 	{"Sirvya,Anshul", "Sirvya Anshul"},
 	{"Vats,Vishant Kumar", ""}, // not present in finance
 	{"VOHRA,Mitali", "VOHRA Mitali"},
+}
+var cotaDevL3OtherPeople = [][]string{
+	{"Chiaramello,Daniel", "Chiaramello Daniel"},                                 // support from platform team
+	{"Deepak,Deepak", "Deepak Deepak"},                                           // support from platform team
+	{"Hernandez Castaneda,Jose Guillermo", "Hernandez Castaneda Jose Guillermo"}, // support from SSC
+}
+var cotaPtfVMBudgetPeople = [][]string{
 	// VM/CZ
 	{"Dokladal,Jakub", "Dokladal Jakub"},
 	{"Fedai,Artem", "Fedai Artem"},
 	{"Lachowicz,Daniel", "Lachowicz Daniel"},
 	{"Przytarski,Bartlomiej", "Przytarski Bartlomiej"},
 	{"Sedlacek,Ondrej", "Sedlacek Ondrej"},
-}
-var cotaDevL3OtherPeople = [][]string{
-	{"Chiaramello,Daniel", "Chiaramello Daniel"},                                 // support from platform team
-	{"Deepak,Deepak", "Deepak Deepak"},                                           // support from platform team
-	{"Hernandez Castaneda,Jose Guillermo", "Hernandez Castaneda Jose Guillermo"}, // support from SSC
 }
 var aotaDevOtherPeople = [][]string{
 	{"Agrawal,Somya", "Agrawal Somya"},
@@ -283,46 +277,52 @@ var ext29751OtaDemoTenantPeople = [][]string{
 }
 
 // --- R1R29753 Innovation
-var innovationBudgetPeople = [][]string{
-	{"Abao,Michael Carlo", "Abao Michael Carlo"},
-	{"ABAO,MICHAEL CARLO", "ABAO MICHAEL CARLO"},
+var innovationBudgetTransPeople = [][]string{
 	{"Berard,Xavier", "Berard Xavier"},
 	{"Bretagne,Eric", "Bretagne Eric"},
+	{"Gattone,Alain", "Gattone Alain"},
+	{"Prigent,Francois", "Prigent Francois"},
+}
+var innovationOtherServerPeople = [][]string{
 	{"Castano,Esteban", "Castano Esteban"},
 	{"Cerny,Jaroslav", "Cerny Jaroslav"},
 	{"Deepak,Deepak", "Deepak Deepak"},
 	{"Dhondiyal,Rituraj", "Dhondiyal Rituraj"},
-	{"Eleserio,Ederlyn", "Eleserio Ederlyn"},
 	{"Freimonas,Romas", "Freimonas Romas"},
-	{"Gattone,Alain", "Gattone Alain"},
-	{"Giva,Joana Marie", "Giva Joana Marie"},
 	{"Kobr,Dan", "Kobr Dan"}, // KMT
 	{"Kumar,Anshuman", "Kumar Anshuman"},
 	{"Lachowicz,Daniel", "Lachowicz Daniel"},
-	{"LAI,SER WEI", "LAI SER WEI"},
-	{"Marquez,Justin", "Marquez Justin"},
 	{"Miani,Alberto", "Miani Alberto"}, // KMT
-	{"ONG,WILSON LEE", "ONG WILSON LEE"},
-	{"Prigent,Francois", "Prigent Francois"},
 	{"Sharma,Gaurav", "Sharma Gaurav"},
 	{"Virmani,Karan", "Virmani Karan"},
 }
+var innovationOtherAppletPeople = [][]string{
+	{"Abao,Michael Carlo", "Abao Michael Carlo"},
+	{"ABAO,MICHAEL CARLO", "ABAO MICHAEL CARLO"},
+	{"Eleserio,Ederlyn", "Eleserio Ederlyn"},
+	{"Giva,Joana Marie", "Giva Joana Marie"},
+	{"LAI,SER WEI", "LAI SER WEI"},
+	{"Marquez,Justin", "Marquez Justin"},
+	{"ONG,WILSON LEE", "ONG WILSON LEE"},
+}
 
 // --- R1R30027 TAC Dev
-var tacBudgetPeople = [][]string{
+var tacBudgetAppletPeople = [][]string{
 	// Applet
 	{"Abao,Michael Carlo", "Abao Michael Carlo"},
 	{"Eleserio,Ederlyn", "Eleserio Ederlyn"},
 	{"ONG,WILSON LEE", "ONG WILSON LEE"},
 	{"Shamsudin,Nurrasyidah", "Shamsudin Nurrasyidah"},
+}
+var tacOtherServerPeople = [][]string{
 	// Server
-	{"Dumitrescu,Florin", "Dumitrescu Florin"}, // support from ODC
-	{"Gupta,Ankur", "Gupta Ankur"},
+	{"Dumitrescu,Florin", "Dumitrescu Florin"},                                   // support from ODC
+	{"Gupta,Ankur", "Gupta Ankur"},                                               // server was not in budget
 	{"Hernandez Castaneda,Jose Guillermo", "Hernandez Castaneda Jose Guillermo"}, // support from SSC
 	{"Myslivets,Alexey", "Myslivets Alexey"},                                     // support from ODC
 	{"Shevnin,Ignat", "Shevnin Ignat"},                                           // support from ODC
-	{"Singh,Gurvinder", "Singh Gurvinder"},
-	{"Singhal,Shivank", "Singhal Shivank"},
+	{"Singh,Gurvinder", "Singh Gurvinder"},                                       // server was not in budget
+	{"Singhal,Shivank", "Singhal Shivank"},                                       // server was not in budget
 }
 
 // Delta with baseline/forecast: Transatel DP+ flow activation for 3k€ [R1R30027]
@@ -331,114 +331,83 @@ var ext30027transatelActPeople = [][]string{
 }
 
 // --- R1R30028 IOT Dev
-var iotBudgetPeople = [][]string{
+var iotBudgetTransPeople = [][]string{
+	// Server
+	{"ATMOPAWIRO,ALSASIAN", "ATMOPAWIRO ALSASIAN"},
+	{"Gattone,Alain", "Gattone Alain"},
+}
+var iotBudgetAppletPeople = [][]string{
 	// Applet
 	{"Abao,Michael Carlo", "Abao Michael Carlo"},
 	{"Eleserio,Ederlyn", "Eleserio Ederlyn"},
 	{"Espinosa,Alen", "Espinosa Alen"},
 	{"LAI,SER WEI", "LAI SER WEI"},
+}
+var iotBudgetServerPeople = [][]string{
 	// Server
-	{"ATMOPAWIRO,ALSASIAN", "ATMOPAWIRO ALSASIAN"},
-	{"Gattone,Alain", "Gattone Alain"},
 	{"Kumar,Vishesh", "Kumar Vishesh"},
+}
+var iotOtherPeople = [][]string{
+	// Server
 	{"Kumar,Vivek", "Kumar Vivek"},
 	{"Prigent,Francois", "Prigent Francois"}, // support from innovation team
 	{"Yadav,Sanjeet", "Yadav Sanjeet"},       // support from innovation team
 }
 
-var cotaManagers = []string{
-	"Pereira Carrari, Mr Mauricio",
-	"Letolle,Nicolas",
-	"Candillier,Christophe Pierre Alphonse",
-	"Kadanik,Jiri",
-	"Vila,Christophe",
-	"Kumar,Vikash",
+var cotaManagersCZ = []string{
 	"Franco Mora,Richard Miguel",
 	"Fesquet,Sebastien",
+	"Kadanik,Jiri",
+}
+var cotaManagersIN = []string{
 	"Pethia,Abhishek",
-	"Khan,Akram Raza",
-	"Mehta,Ashish",
 	"KUMAR,Narendra",
-	"Gupta,Anshul",
+	"Khan,Akram Raza",
+	"Kumar,Vikash",
 	"Kumar,Vivek",
+	"Mehta,Ashish",
+	"Gupta,Anshul",
+	"Sharma,Gaurav",           // as previous/future manager of COTA resource
+	"Gupta,Nainsy",            // as previous/future manager of COTA resource
+	"Kanwal,Ishan",            // as previous/future manager of COTA resource
+	"Kumar Srivastava,Neeraj", // as previous/future manager of COTA resource
+	"Sharma,Ajay",             // as previous/future manager of COTA resource
+}
+var cotaManagersUS = []string{
+	"Letolle,Nicolas",
+}
+var cotaManagersFR = []string{
+	"Pereira Carrari,Mauricio",
+	"Vila,Christophe",
 }
 
-var aotaManagers = []string{
-	// malik nauman => omar gustavo alvirde sierra =>
-	"Cavalier,Laurent",
-	"Sharma,Amitabh Prakash",
+var peopleExceptions = map[string]string{
+	"Barilly,Adrien": "CZ",
 }
 
-var otherManagers = []string{
-	// MCS server (gorse)
-	"Leclercq,Frederic",
-	"Hourcadette,Sandrine",
-	// MCS applet (grellier)
-	"Lam,Ching Yan",
-}
-
-type costsSplit map[string][]string
-
-var projectsTeamWorkload map[string]costsSplit
-
-var projectsOtherCosts map[string]costsSplit
-
-func init() {
-	verbose := false
-	projectsTeamWorkload = make(map[string]costsSplit)
-	projectsOtherCosts = make(map[string]costsSplit)
-	projectsTeamWorkload["R1R29750"] = costsSplit{
-		"Budget":      uniquePeople(verbose, 1, cotaDevL3BudgetPeople),
-		"Other":       uniquePeople(verbose, 1, cotaDevL3OtherPeople),
-		"Other(AOTA)": uniquePeople(verbose, 1, aotaL3BudgetPeople, aotaL3OtherPeople, aotaDevOtherPeople),
-		"Extension":   uniquePeople(verbose, 1, ext29750MyosdTeamPeople, ext29750Tls13People, ext29750NewAppletsPeople, ext29750NgmMigrationPeople),
+var cotaManagerCountry pivot.Compute[string] = func(elements []pivot.RawValue) (string, error) {
+	if c, ok := peopleExceptions[elements[1].(string)]; ok {
+		return c, nil
 	}
-	projectsOtherCosts["R1R29750"] = costsSplit{
-		"Budget":    {Recharge},
-		"Other":     {Employee, Travel},
-		"Extension": {Agency},
+	for _, m := range cotaManagersCZ {
+		if m == elements[0] {
+			return "CZ", nil
+		}
 	}
-	projectsTeamWorkload["R1R29751"] = costsSplit{
-		"Budget":    uniquePeople(verbose, 1, cotaPtfBudgetPeople),
-		"Other":     uniquePeople(verbose, 1, cotaPtfOtherPeople),
-		"Extension": uniquePeople(verbose, 1, ext29751OtaDemoTenantPeople),
+	for _, m := range cotaManagersFR {
+		if m == elements[0] {
+			return "FR", nil
+		}
 	}
-	projectsOtherCosts["R1R29751"] = costsSplit{
-		"Budget": {OpsCosts, ProFees, Facilities, Datacenter},
+	for _, m := range cotaManagersIN {
+		if m == elements[0] {
+			return "IN", nil
+		}
 	}
-	projectsTeamWorkload["R0S29752"] = costsSplit{
-		"Budget(COTA)": uniquePeople(verbose, 1, cotaDevL3BudgetPeople),
-		"Budget(AOTA)": uniquePeople(verbose, 1, aotaL3BudgetPeople),
-		"Other(COTA)":  uniquePeople(verbose, 1, cotaDevL3OtherPeople),
-		"Other(AOTA)":  uniquePeople(verbose, 1, aotaL3OtherPeople),
+	for _, m := range cotaManagersUS {
+		if m == elements[0] {
+			return "US", nil
+		}
 	}
-	projectsTeamWorkload["R1R29753"] = costsSplit{
-		"Budget": uniquePeople(verbose, 1, innovationBudgetPeople),
-	}
-	projectsOtherCosts["R1R29753"] = costsSplit{
-		"Budget": {Datacenter},
-	}
-	projectsTeamWorkload["R0R29754"] = costsSplit{
-		"Budget": uniquePeople(verbose, 1, improvmentBudgetPeople),
-		"Other":  uniquePeople(verbose, 1, improvmentOtherPeople),
-	}
-	projectsOtherCosts["R0R29754"] = costsSplit{
-		"Other": {Travel, Datacenter},
-	}
-	projectsTeamWorkload["R0R29805"] = costsSplit{
-		"Budget": uniquePeople(verbose, 1, centralRDPeople),
-	}
-	projectsOtherCosts["R0R29805"] = costsSplit{
-		"Other": {Agency},
-	}
-	projectsTeamWorkload["R0T30005"] = costsSplit{
-		"Budget": uniquePeople(verbose, 1, transversalPeople),
-	}
-	projectsTeamWorkload["R1R30027"] = costsSplit{
-		"Budget":    uniquePeople(verbose, 1, tacBudgetPeople),
-		"Extension": uniquePeople(verbose, 1, ext30027transatelActPeople),
-	}
-	projectsTeamWorkload["R1R30028"] = costsSplit{
-		"Budget": uniquePeople(verbose, 1, iotBudgetPeople),
-	}
+	return fmt.Sprintf("??-%s", elements[0]), nil
 }

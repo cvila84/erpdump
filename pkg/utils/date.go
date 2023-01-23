@@ -3,6 +3,7 @@ package utils
 import (
 	"fmt"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -64,6 +65,17 @@ func Month(month int) string {
 		return "Dec"
 	}
 	return "M?" + strconv.Itoa(month)
+}
+
+func ToDateYYYYsMM(month, year int) string {
+	var sb strings.Builder
+	sb.WriteString(strconv.Itoa(year))
+	sb.WriteString("-")
+	if month < 10 {
+		sb.WriteString("0")
+	}
+	sb.WriteString(strconv.Itoa(month))
+	return sb.String()
 }
 
 func ParseDateYYYYsMM(date string) (int, int, error) {
