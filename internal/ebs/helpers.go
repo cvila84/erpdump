@@ -52,40 +52,6 @@ var dailyRate pivot.Compute[float64] = func(elements []pivot.RawValue) (float64,
 	}
 }
 
-var projectGroups = func(prefixProject bool) pivot.Compute[string] {
-	return func(elements []pivot.RawValue) (string, error) {
-		project, ok := elements[0].(string)
-		if !ok {
-			return "", pivot.InvalidType(elements[0])
-		}
-		var prefix string
-		if prefixProject {
-			prefix = project + "-"
-		}
-		teamWorkload, ok := projectsWorkloadSplit[project]
-		if ok {
-			for k, v := range teamWorkload {
-				for _, p := range v {
-					if p == elements[1] && Workload == elements[2] {
-						return prefix + k, nil
-					}
-				}
-			}
-		}
-		otherCosts, ok := projectOtherCostsSplit[project]
-		if ok {
-			for k, v := range otherCosts {
-				for _, p := range v {
-					if p == elements[2] {
-						return prefix + k, nil
-					}
-				}
-			}
-		}
-		return prefix + "Unknown", nil
-	}
-}
-
 func uniquePeople(verbose bool, index int, peopleLists ...[][]string) []string {
 	var result []string
 	for _, l1 := range peopleLists {

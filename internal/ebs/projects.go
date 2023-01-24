@@ -1,5 +1,7 @@
 package ebs
 
+import "github.com/cvila84/erpdump/pkg/pivot"
+
 /*
 2022 Delta with baseline/forecast: +1 SM in Praha agreed by Mauricio [R1R29750]
 2022 Delta with baseline/forecast: +2 ppl in Noida agreed by Mauricio to compensate turn-overs [R1R29750]
@@ -83,6 +85,40 @@ var functionalOtherProjects = []string{
 var functionalHolidaysProjects = []string{
 	"RDX0000H",
 	"CWH10000",
+}
+
+var projectGroups = func(prefixProject bool) pivot.Compute[string] {
+	return func(elements []pivot.RawValue) (string, error) {
+		project, ok := elements[0].(string)
+		if !ok {
+			return "", pivot.InvalidType(elements[0])
+		}
+		var prefix string
+		if prefixProject {
+			prefix = project + "-"
+		}
+		teamWorkload, ok := projectsWorkloadSplit[project]
+		if ok {
+			for k, v := range teamWorkload {
+				for _, p := range v {
+					if p == elements[1] && Workload == elements[2] {
+						return prefix + k, nil
+					}
+				}
+			}
+		}
+		otherCosts, ok := projectOtherCostsSplit[project]
+		if ok {
+			for k, v := range otherCosts {
+				for _, p := range v {
+					if p == elements[2] {
+						return prefix + k, nil
+					}
+				}
+			}
+		}
+		return prefix + "Unknown", nil
+	}
 }
 
 type projectSplit map[string][]string
