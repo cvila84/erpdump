@@ -74,16 +74,16 @@ var otaImprovementProjects = []string{
 
 var functionalOtherProjects = []string{
 	"RDX0000A",
-	"RDX0000S",
 	"RDX0000T",
-	"RDX000PT",
 	"X0000T",
 	"CWB10000",
 	"CWT10000",
 }
 
 var functionalHolidaysProjects = []string{
+	"RDX0000S",
 	"RDX0000H",
+	"RDX000PT",
 	"CWH10000",
 }
 

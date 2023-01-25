@@ -264,7 +264,7 @@ var cotaPtfOtherPeople = [][]string{
 	{"Letolle,Nicolas", "Letolle Nicolas"},                 // support from deployment team
 	{"LIM, Mr BERNARD KENNETH", "LIM BERNARD KENNETH"},     // support from DB expert team
 	{"Nandiraju,Pavan Kumar", "Nandiraju Pavan Kumar"},     // support from DB expert team
-	{"Perez Lagunas,Daniela", "Perez Lagunas Daniela"},     // support from MyOSD team
+	{"Perez Lagunas,Daniela", "Perez Lagunas Daniela"},     // support from deployment team
 	{"Schammass,Alexandre", "Schammass Alexandre"},         // support from deployment team
 	{"Sharma,Aditya", "Sharma Aditya"},                     // newcomer to replace budgeted resource
 	{"Sharma,Gaurav", "Sharma Gaurav"},                     // deployment/platform team manager
@@ -307,6 +307,9 @@ var innovationOtherAppletPeople = [][]string{
 }
 
 // --- R1R30027 TAC Dev
+var tac2023BudgetServerPeople = [][]string{
+	{"Gattone,Alain", "Gattone Alain"},
+}
 var tacBudgetAppletPeople = [][]string{
 	// Applet
 	{"Abao,Michael Carlo", "Abao Michael Carlo"},
