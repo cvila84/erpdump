@@ -1,7 +1,7 @@
 package ebs
 
 import (
-	"github.com/cvila84/erpdump/pkg/utils"
+	"github.com/cvila84/erpdump/internal/utils"
 	"strconv"
 )
 

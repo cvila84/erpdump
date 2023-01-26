@@ -1,6 +1,6 @@
 package ebs
 
-import "github.com/cvila84/erpdump/pkg/pivot"
+import "github.com/cvila84/pivot"
 
 /*
 2022 Delta with baseline/forecast: +1 SM in Praha agreed by Mauricio [R1R29750]

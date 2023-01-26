@@ -2,7 +2,7 @@ package ebs
 
 import (
 	"fmt"
-	"github.com/cvila84/erpdump/pkg/pivot"
+	"github.com/cvila84/pivot"
 )
 
 // --- R0R29805 Central R&D
