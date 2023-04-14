@@ -6,7 +6,7 @@ import (
 	"path/filepath"
 )
 
-func GenerateFromEBSExport(csvDataFiles []string, csvTablePath, csvTablePrefix string) error {
+func GenerateFromEBSExport(csvDataFiles []string, csvTablePath, csvTablePrefix string, verbose bool) error {
 	data, err := filesToRawData(csvDataFiles)
 	if err != nil {
 		return fmt.Errorf("while reading %v: %w", csvDataFiles, err)
@@ -42,7 +42,7 @@ func GenerateFromEBSExport(csvDataFiles []string, csvTablePath, csvTablePrefix s
 		ComputedRow([]int{2}, pivot.In(uniquePeople(false, 0, cotaDevL3BudgetPeople)), nil, pivot.AlphaSort).
 		ComputedColumn([]int{4}, nil, monthlySplit, pivot.MonthSort).
 		Values(5, pivot.Sum, pivot.Digits(1))
-	err = table.Generate()
+	err = table.Generate(verbose)
 	if err != nil {
 		return err
 	}
@@ -58,7 +58,7 @@ func GenerateFromEBSExport(csvDataFiles []string, csvTablePath, csvTablePrefix s
 		ComputedRow([]int{0}, nil, nil, pivot.AlphaSort).
 		ComputedColumn([]int{4}, nil, monthlySplit, pivot.MonthSort).
 		Values(5, pivot.Sum, pivot.Digits(1))
-	err = table.Generate()
+	err = table.Generate(verbose)
 	if err != nil {
 		return err
 	}
@@ -74,7 +74,7 @@ func GenerateFromEBSExport(csvDataFiles []string, csvTablePath, csvTablePrefix s
 		ComputedRow([]int{0}, nil, nil, pivot.AlphaSort).
 		ComputedColumn([]int{4}, nil, monthlySplit, pivot.MonthSort).
 		Values(5, pivot.Sum, pivot.Digits(1))
-	err = table.Generate()
+	err = table.Generate(verbose)
 	if err != nil {
 		return err
 	}
@@ -86,31 +86,57 @@ func GenerateFromEBSExport(csvDataFiles []string, csvTablePath, csvTablePrefix s
 	return nil
 }
 
-func GenerateFromFinanceExport(csvDataFiles []string, csvTablePath, csvTablePrefix string) error {
+type FinanceRecordKind int
+
+const (
+	Month FinanceRecordKind = iota
+	Project
+	Cost
+	Category
+	ExpOrg
+	Employee
+	Hours
+)
+
+type FinanceRecordIndexes map[FinanceRecordKind]int
+
+var RecordIndexes2022 = FinanceRecordIndexes{
+	Month:    3,
+	Project:  14,
+	Cost:     21,
+	Category: 26,
+	ExpOrg:   27,
+	Employee: 32,
+	Hours:    40,
+}
+
+var RecordIndexes2023 = FinanceRecordIndexes{
+	Month:    6,
+	Project:  17,
+	Cost:     24,
+	Category: 29,
+	ExpOrg:   30,
+	Employee: 36,
+	Hours:    44,
+}
+
+func GenerateFromFinanceExport(csvDataFiles []string, csvRecordIndexes FinanceRecordIndexes, csvTablePath, csvTablePrefix string, verbose bool) error {
 	pivotData, err := filesToRawData([]string{csvDataFiles[0]})
 	if err != nil {
 		return fmt.Errorf("while reading %v: %w", csvDataFiles, err)
 	}
 
-	// record[3]=month (yyyy-mm)
-	// record[14]=project
-	// record[21]=cost
-	// record[26]=category
-	// record[27]=exporg
-	// record[32]=employee
-	// record[40]=hours
-
 	table := pivot.NewTable(pivotData, true).
-		ComputedRow([]int{14}, nil, nil, pivot.AlphaSort).
-		ComputedRow([]int{14, 32, 26}, nil, projectGroups(false), pivot.AlphaSort).
-		Row(26).
-		ComputedRow([]int{27}, nil, nil, pivot.AlphaSort).
-		ComputedRow([]int{32}, nil, nil, pivot.AlphaSort).
-		ComputedColumn([]int{3}, nil, monthlySplit, pivot.MonthSort).
-		Values(40, pivot.Sum, pivot.Digits(0)).
-		Values(21, pivot.Sum, pivot.Digits(0)).
-		ComputedValues("DailyRate", pivot.DataRefs([]int{40, 21}, pivot.Sum), dailyRate, pivot.Digits(0))
-	err = table.Generate()
+		ComputedRow([]int{csvRecordIndexes[Project]}, nil, nil, pivot.AlphaSort).
+		ComputedRow([]int{csvRecordIndexes[Project], csvRecordIndexes[Employee], csvRecordIndexes[Category]}, nil, projectPeopleGroups(false), pivot.AlphaSort).
+		Row(csvRecordIndexes[Category]).
+		ComputedRow([]int{csvRecordIndexes[ExpOrg]}, nil, nil, pivot.AlphaSort).
+		ComputedRow([]int{csvRecordIndexes[Employee]}, nil, nil, pivot.AlphaSort).
+		ComputedColumn([]int{csvRecordIndexes[Month]}, nil, monthlySplit, pivot.MonthSort).
+		Values(csvRecordIndexes[Hours], pivot.Sum, pivot.Digits(0)).
+		Values(csvRecordIndexes[Cost], pivot.Sum, pivot.Digits(0)).
+		ComputedValues("DailyRate", pivot.DataRefs([]int{csvRecordIndexes[Hours], csvRecordIndexes[Cost]}, pivot.Sum), dailyRate, pivot.Digits(0))
+	err = table.Generate(verbose)
 	if err != nil {
 		return err
 	}
@@ -120,35 +146,67 @@ func GenerateFromFinanceExport(csvDataFiles []string, csvTablePath, csvTablePref
 	}
 
 	table = pivot.NewTable(pivotData, true).
-		ComputedRow([]int{14}, nil, nil, pivot.AlphaSort).
-		ComputedRow([]int{14, 32, 26}, nil, projectGroups(false), pivot.AlphaSort).
-		Row(26).
-		ComputedRow([]int{27}, nil, nil, pivot.AlphaSort).
-		ComputedRow([]int{32}, nil, nil, pivot.AlphaSort).
-		ComputedColumn([]int{3}, nil, monthlySplit, pivot.MonthSort).
-		Values(40, pivot.Sum, pivot.Digits(0))
-	err = table.Generate()
+		ComputedRow([]int{csvRecordIndexes[Project]}, nil, nil, pivot.AlphaSort).
+		ComputedRow([]int{csvRecordIndexes[Project], csvRecordIndexes[Employee], csvRecordIndexes[Category]}, nil, projectPeopleGroups(false), pivot.AlphaSort).
+		Row(csvRecordIndexes[Category]).
+		ComputedRow([]int{csvRecordIndexes[ExpOrg]}, nil, nil, pivot.AlphaSort).
+		ComputedRow([]int{csvRecordIndexes[Employee]}, nil, nil, pivot.AlphaSort).
+		ComputedColumn([]int{csvRecordIndexes[Month]}, nil, monthlySplit, pivot.MonthSort).
+		Values(csvRecordIndexes[Hours], pivot.Sum, pivot.Digits(0))
+	err = table.Generate(verbose)
 	if err != nil {
 		return err
 	}
-	err = saveCsvFile(csvTablePath+string(filepath.Separator)+csvTablePrefix+"-rdh.csv", table.ToCSV())
+	err = saveCsvFile(csvTablePath+string(filepath.Separator)+csvTablePrefix+"-rdh1.csv", table.ToCSV())
 	if err != nil {
 		return err
 	}
 
 	table = pivot.NewTable(pivotData, true).
-		ComputedRow([]int{14}, nil, nil, pivot.AlphaSort).
-		ComputedRow([]int{14, 32, 26}, nil, projectGroups(false), pivot.AlphaSort).
-		Row(26).
-		ComputedRow([]int{27}, nil, nil, pivot.AlphaSort).
-		ComputedRow([]int{32}, nil, nil, pivot.AlphaSort).
-		ComputedColumn([]int{3}, nil, monthlySplit, pivot.MonthSort).
-		Values(21, pivot.Sum, pivot.Digits(0))
-	err = table.Generate()
+		ComputedRow([]int{csvRecordIndexes[Project]}, nil, nil, pivot.AlphaSort).
+		Row(csvRecordIndexes[Category]).
+		ComputedRow([]int{csvRecordIndexes[ExpOrg]}, nil, nil, pivot.AlphaSort).
+		ComputedRow([]int{csvRecordIndexes[Employee]}, nil, nil, pivot.AlphaSort).
+		ComputedColumn([]int{csvRecordIndexes[Month]}, nil, monthlySplit, pivot.MonthSort).
+		Values(csvRecordIndexes[Hours], pivot.Sum, pivot.Digits(0))
+	err = table.Generate(verbose)
 	if err != nil {
 		return err
 	}
-	err = saveCsvFile(csvTablePath+string(filepath.Separator)+csvTablePrefix+"-rdc.csv", table.ToCSV())
+	err = saveCsvFile(csvTablePath+string(filepath.Separator)+csvTablePrefix+"-rdh2.csv", table.ToCSV())
+	if err != nil {
+		return err
+	}
+
+	table = pivot.NewTable(pivotData, true).
+		ComputedRow([]int{csvRecordIndexes[Project]}, nil, nil, pivot.AlphaSort).
+		ComputedRow([]int{csvRecordIndexes[Project], csvRecordIndexes[Employee], csvRecordIndexes[Category]}, nil, projectPeopleGroups(false), pivot.AlphaSort).
+		Row(csvRecordIndexes[Category]).
+		ComputedRow([]int{csvRecordIndexes[ExpOrg]}, nil, nil, pivot.AlphaSort).
+		ComputedRow([]int{csvRecordIndexes[Employee]}, nil, nil, pivot.AlphaSort).
+		ComputedColumn([]int{csvRecordIndexes[Month]}, nil, monthlySplit, pivot.MonthSort).
+		Values(csvRecordIndexes[Cost], pivot.Sum, pivot.Digits(0))
+	err = table.Generate(verbose)
+	if err != nil {
+		return err
+	}
+	err = saveCsvFile(csvTablePath+string(filepath.Separator)+csvTablePrefix+"-rdc1.csv", table.ToCSV())
+	if err != nil {
+		return err
+	}
+
+	table = pivot.NewTable(pivotData, true).
+		ComputedRow([]int{csvRecordIndexes[Project]}, nil, nil, pivot.AlphaSort).
+		Row(csvRecordIndexes[Category]).
+		ComputedRow([]int{csvRecordIndexes[ExpOrg]}, nil, nil, pivot.AlphaSort).
+		ComputedRow([]int{csvRecordIndexes[Employee]}, nil, nil, pivot.AlphaSort).
+		ComputedColumn([]int{csvRecordIndexes[Month]}, nil, monthlySplit, pivot.MonthSort).
+		Values(csvRecordIndexes[Cost], pivot.Sum, pivot.Digits(0))
+	err = table.Generate(verbose)
+	if err != nil {
+		return err
+	}
+	err = saveCsvFile(csvTablePath+string(filepath.Separator)+csvTablePrefix+"-rdc2.csv", table.ToCSV())
 	if err != nil {
 		return err
 	}
@@ -159,16 +217,16 @@ func GenerateFromFinanceExport(csvDataFiles []string, csvTablePath, csvTablePref
 	}
 
 	table = pivot.NewTable(pivotData, true).
-		ComputedRow([]int{14}, nil, nil, pivot.AlphaSort).
-		ComputedRow([]int{14, 32, 26}, nil, projectGroups(false), pivot.AlphaSort).
-		Row(26).
-		ComputedRow([]int{27}, nil, nil, pivot.AlphaSort).
-		ComputedRow([]int{32}, nil, nil, pivot.AlphaSort).
-		ComputedColumn([]int{3}, nil, monthlySplit, pivot.MonthSort).
-		Values(40, pivot.Sum, pivot.Digits(0)).
-		Values(21, pivot.Sum, pivot.Digits(0)).
-		ComputedValues("DailyRate", pivot.DataRefs([]int{40, 21}, pivot.Sum), dailyRate, pivot.Digits(0))
-	err = table.Generate()
+		ComputedRow([]int{csvRecordIndexes[Project]}, nil, nil, pivot.AlphaSort).
+		ComputedRow([]int{csvRecordIndexes[Project], csvRecordIndexes[Employee], csvRecordIndexes[Category]}, nil, projectPeopleGroups(false), pivot.AlphaSort).
+		Row(csvRecordIndexes[Category]).
+		ComputedRow([]int{csvRecordIndexes[ExpOrg]}, nil, nil, pivot.AlphaSort).
+		ComputedRow([]int{csvRecordIndexes[Employee]}, nil, nil, pivot.AlphaSort).
+		ComputedColumn([]int{csvRecordIndexes[Month]}, nil, monthlySplit, pivot.MonthSort).
+		Values(csvRecordIndexes[Hours], pivot.Sum, pivot.Digits(0)).
+		Values(csvRecordIndexes[Cost], pivot.Sum, pivot.Digits(0)).
+		ComputedValues("DailyRate", pivot.DataRefs([]int{csvRecordIndexes[Hours], csvRecordIndexes[Cost]}, pivot.Sum), dailyRate, pivot.Digits(0))
+	err = table.Generate(verbose)
 	if err != nil {
 		return err
 	}
@@ -178,14 +236,14 @@ func GenerateFromFinanceExport(csvDataFiles []string, csvTablePath, csvTablePref
 	}
 
 	table = pivot.NewTable(pivotData, true).
-		ComputedRow([]int{14}, nil, nil, pivot.AlphaSort).
-		ComputedRow([]int{14, 32, 26}, nil, projectGroups(false), pivot.AlphaSort).
-		Row(26).
-		ComputedRow([]int{27}, nil, nil, pivot.AlphaSort).
-		ComputedRow([]int{32}, nil, nil, pivot.AlphaSort).
-		ComputedColumn([]int{3}, nil, monthlySplit, pivot.MonthSort).
-		Values(40, pivot.Sum, pivot.Digits(0))
-	err = table.Generate()
+		ComputedRow([]int{csvRecordIndexes[Project]}, nil, nil, pivot.AlphaSort).
+		ComputedRow([]int{csvRecordIndexes[Project], csvRecordIndexes[Employee], csvRecordIndexes[Category]}, nil, projectPeopleGroups(false), pivot.AlphaSort).
+		Row(csvRecordIndexes[Category]).
+		ComputedRow([]int{csvRecordIndexes[ExpOrg]}, nil, nil, pivot.AlphaSort).
+		ComputedRow([]int{csvRecordIndexes[Employee]}, nil, nil, pivot.AlphaSort).
+		ComputedColumn([]int{csvRecordIndexes[Month]}, nil, monthlySplit, pivot.MonthSort).
+		Values(csvRecordIndexes[Hours], pivot.Sum, pivot.Digits(0))
+	err = table.Generate(verbose)
 	if err != nil {
 		return err
 	}
@@ -195,14 +253,14 @@ func GenerateFromFinanceExport(csvDataFiles []string, csvTablePath, csvTablePref
 	}
 
 	table = pivot.NewTable(pivotData, true).
-		ComputedRow([]int{14}, nil, nil, pivot.AlphaSort).
-		ComputedRow([]int{14, 32, 26}, nil, projectGroups(false), pivot.AlphaSort).
-		Row(26).
-		ComputedRow([]int{27}, nil, nil, pivot.AlphaSort).
-		ComputedRow([]int{32}, nil, nil, pivot.AlphaSort).
-		ComputedColumn([]int{3}, nil, monthlySplit, pivot.MonthSort).
-		Values(21, pivot.Sum, pivot.Digits(0))
-	err = table.Generate()
+		ComputedRow([]int{csvRecordIndexes[Project]}, nil, nil, pivot.AlphaSort).
+		ComputedRow([]int{csvRecordIndexes[Project], csvRecordIndexes[Employee], csvRecordIndexes[Category]}, nil, projectPeopleGroups(false), pivot.AlphaSort).
+		Row(csvRecordIndexes[Category]).
+		ComputedRow([]int{csvRecordIndexes[ExpOrg]}, nil, nil, pivot.AlphaSort).
+		ComputedRow([]int{csvRecordIndexes[Employee]}, nil, nil, pivot.AlphaSort).
+		ComputedColumn([]int{csvRecordIndexes[Month]}, nil, monthlySplit, pivot.MonthSort).
+		Values(csvRecordIndexes[Cost], pivot.Sum, pivot.Digits(0))
+	err = table.Generate(verbose)
 	if err != nil {
 		return err
 	}

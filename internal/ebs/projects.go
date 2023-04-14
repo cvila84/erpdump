@@ -16,15 +16,15 @@ import "github.com/cvila84/pivot"
 */
 
 const (
-	Workload   = "Workload"
-	Travel     = "Travel & entertainment"
-	Agency     = "Temps & agency costs"
-	Recharge   = "Allocations & recharges mgmt"
-	Employee   = "Employee-related"
-	CenterCost = "DC Cost"
-	OpCost     = "Operating costs"
-	Fees       = "Professional fees"
-	Facilities = "Facilities"
+	CostWorkload   = "Workload"
+	CostTravel     = "Travel & entertainment"
+	CostAgency     = "Temps & agency costs"
+	CostRecharge   = "Allocations & recharges mgmt"
+	CostEmployee   = "Employee-related"
+	CostCenter     = "DC Cost"
+	CostOp         = "Operating costs"
+	CostFees       = "Professional fees"
+	CostFacilities = "Facilities"
 )
 
 // ---
@@ -34,9 +34,11 @@ var otaDevProjects = []string{
 }
 
 var otaCogsProjects = []string{
+	"EAF22013",
 	"EBD21005",
 	"EBD21015",
 	"EBD22002",
+	"EBF22018",
 	"EEF22017",
 }
 
@@ -87,7 +89,7 @@ var functionalHolidaysProjects = []string{
 	"CWH10000",
 }
 
-var projectGroups = func(prefixProject bool) pivot.Compute[string] {
+var projectPeopleGroups = func(prefixProject bool) pivot.Compute[string] {
 	return func(elements []pivot.RawValue) (string, error) {
 		project, ok := elements[0].(string)
 		if !ok {
@@ -101,7 +103,7 @@ var projectGroups = func(prefixProject bool) pivot.Compute[string] {
 		if ok {
 			for k, v := range teamWorkload {
 				for _, p := range v {
-					if p == elements[1] && Workload == elements[2] {
+					if p == elements[1] && CostWorkload == elements[2] {
 						return prefix + k, nil
 					}
 				}
@@ -138,9 +140,9 @@ func initProjects(index int, verbose bool) {
 		"Extension":    uniquePeople(verbose, index, ext29750MyosdTeamPeople, ext29750Tls13People, ext29750NewAppletsPeople, ext29750NgmMigrationPeople),
 	}
 	projectOtherCostsSplit["R1R29750"] = projectSplit{
-		"Budget":    {Recharge},
-		"Other":     {Employee, Travel},
-		"Extension": {Agency},
+		"Budget":    {CostRecharge},
+		"Other":     {CostEmployee, CostTravel},
+		"Extension": {CostAgency},
 	}
 	projectsWorkloadSplit["R1R29751"] = projectSplit{
 		"Budget":    uniquePeople(verbose, index, cotaPtfBudgetPeople),
@@ -148,7 +150,7 @@ func initProjects(index int, verbose bool) {
 		"Extension": uniquePeople(verbose, index, ext29751OtaDemoTenantPeople),
 	}
 	projectOtherCostsSplit["R1R29751"] = projectSplit{
-		"Budget": {OpCost, Fees, Facilities, CenterCost},
+		"Budget": {CostOp, CostFees, CostFacilities, CostCenter},
 	}
 	projectsWorkloadSplit["R0S29752"] = projectSplit{
 		"Budget(COTA)": uniquePeople(verbose, index, cotaDevL3BudgetPeople, cotaPtfVMBudgetPeople),
@@ -161,20 +163,20 @@ func initProjects(index int, verbose bool) {
 		"Other":  uniquePeople(verbose, index, innovationOtherServerPeople, innovationOtherAppletPeople),
 	}
 	projectOtherCostsSplit["R1R29753"] = projectSplit{
-		"Other": {CenterCost},
+		"Other": {CostCenter},
 	}
 	projectsWorkloadSplit["R0R29754"] = projectSplit{
 		"Budget": uniquePeople(verbose, index, improvmentBudgetPeople),
 		"Other":  uniquePeople(verbose, index, improvmentOtherPeople),
 	}
 	projectOtherCostsSplit["R0R29754"] = projectSplit{
-		"Other": {Travel, CenterCost},
+		"Other": {CostTravel, CostCenter},
 	}
 	projectsWorkloadSplit["R0R29805"] = projectSplit{
 		"Budget": uniquePeople(verbose, index, centralRDPeople),
 	}
 	projectOtherCostsSplit["R0R29805"] = projectSplit{
-		"Other": {Agency},
+		"Other": {CostAgency},
 	}
 	projectsWorkloadSplit["R0T30005"] = projectSplit{
 		"Budget": uniquePeople(verbose, index, transversalPeople),
@@ -187,6 +189,62 @@ func initProjects(index int, verbose bool) {
 	projectsWorkloadSplit["R1R30028"] = projectSplit{
 		"Budget": uniquePeople(verbose, index, iotBudgetServerPeople, iotBudgetAppletPeople, iotBudgetTransPeople),
 		"Other":  uniquePeople(verbose, index, iotOtherPeople),
+	}
+}
+
+// ---
+
+var expOrgDSOta = []string{
+	"FRA1.FRLV.SVBLD.TA.DSOTA",
+	"INS1.INNA.SVBLD.TA.DSOTA",
+	"MXG1.MXCU.SVBLD.TA.DSOTA",
+	"PLC1.PLTC.SVBLD.TA.DSOTA",
+	"SZK1.CZPR.SVBLD.TA.DSOTA",
+	"IUC1.ITRO.SVBLD.TA.DSOTA",
+	"USA1.USAU.SVBLD.TA.DSOTA",
+	"USA1.USRS.SVBLD.TA.DSOTA",
+}
+
+var expOrgDSCen = []string{
+	"PHP1.PHMK.RMASD.NF.CEN06",
+	"SGG1.SGSI.RMASD.NF.CEN06",
+}
+
+var expOrgDSInn = []string{
+	"FRA1.FRLV.SVBLD.TA.DSINN",
+}
+
+var projectExpOrgGroups = func(prefixProject bool) pivot.Compute[string] {
+	return func(elements []pivot.RawValue) (string, error) {
+		project, ok := elements[0].(string)
+		if !ok {
+			return "", pivot.InvalidType(elements[0])
+		}
+		var prefix string
+		if prefixProject {
+			prefix = project + "-"
+		}
+		teamWorkload, ok := projectsWorkloadSplit[project]
+		if ok {
+			for k, v := range teamWorkload {
+				for _, p := range v {
+					if p == elements[1] && CostWorkload == elements[2] {
+						return prefix + k, nil
+					}
+				}
+			}
+		}
+		otherCosts, ok := projectOtherCostsSplit[project]
+		if ok {
+			for k, v := range otherCosts {
+				for _, p := range v {
+					if p == elements[2] {
+						return prefix + k, nil
+					}
+				}
+			}
+		}
+		return prefix + "Unknown", nil
 	}
 }
 

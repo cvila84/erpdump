@@ -140,11 +140,11 @@ var cotaDevL3BudgetPeople = [][]string{
 	{"Gupta,Ankur", "Gupta Ankur"},
 	{"Gupta,Anshul", "Gupta Anshul"},
 	{"Harshadbhai,Patel Kaushikkumar", "Harshadbhai Patel Kaushikkumar"},
-	{"Jain,Himanshu", ""}, // not present in finance
+	{"Jain,Himanshu", "Jain Himanshu"}, // not present in finance 2022
 	{"Jain,Shubham", "Jain Shubham"},
 	{"Jha,Ashwani Kumar", "Jha Ashwani Kumar"},
 	{"Kalani,Anukriti", "Kalani Anukriti"},
-	{"KANSAL,MANIKA", ""}, // not present in finance
+	{"KANSAL,MANIKA", "KANSAL MANIKA"}, // not present in finance in 2022
 	{"Khan,Akram Raza", "Khan Akram Raza"},
 	{"Khan,Momin", "Khan Momin"},
 	{"Khan,Wasim", "Khan Wasim"},
@@ -156,7 +156,6 @@ var cotaDevL3BudgetPeople = [][]string{
 	{"kumar,Saurabh", "kumar Saurabh"},
 	{"Kumar,Sujit", "Kumar Sujit"},
 	{"Kumar,Vikas", "Kumar Vikas"},
-	{"Kumar,Vivek", "Kumar Vivek"},
 	{"PANDEY,Priyesh", "PANDEY Priyesh"},
 	{"Pandey,Renu", "Pandey Renu"},
 	{"Pethia,Abhishek", "Pethia Abhishek"},
@@ -164,6 +163,7 @@ var cotaDevL3BudgetPeople = [][]string{
 	{"Rajwaar,Shweta", "Rajwaar Shweta"},
 	{"Rawat,Yoginder", "Rawat Yoginder"},
 	{"Rupera,Bhumika", "Rupera Bhumika"},
+	{"Sajwan, Shivam", "Sajwan Shivam"},
 	{"SHARMA,ADITI", "SHARMA ADITI"},
 	{"Sharma,Ashwani Kumar", "Sharma Ashwani Kumar"},
 	{"Sharma,Himanshu", "Sharma Himanshu"},
@@ -175,11 +175,14 @@ var cotaDevL3BudgetPeople = [][]string{
 	{"Singh,Devyani", "Singh Devyani"},
 	{"Singh,Gurvinder", "Singh Gurvinder"},
 	{"Singh,Hameer", "Singh Hameer"},
-	{"SINGH,VIJAYLAXMI", "SINGH VIJAYLAXMI"},
 	{"Singhal,Shivank", "Singhal Shivank"},
 	{"Sirvya,Anshul", "Sirvya Anshul"},
-	{"Vats,Vishant Kumar", ""}, // not present in finance
+	{"Vats,Vishant Kumar", "Vats Vishant Kumar"}, // not present in finance in 2022
 	{"VOHRA,Mitali", "VOHRA Mitali"},
+}
+var cotaOldDevL3BudgetPeople = [][]string{
+	{"Kumar,Vivek", "Kumar Vivek"},
+	{"SINGH,VIJAYLAXMI", "SINGH VIJAYLAXMI"},
 }
 var cotaDevL3OtherPeople = [][]string{
 	{"Chiaramello,Daniel", "Chiaramello Daniel"},                                 // support from platform team
@@ -214,6 +217,7 @@ var ext29750NgmMigrationPeople = [][]string{
 
 // Delta with baseline/forecast: New refresh applet, MIV2 study for NB-IOT, Applet study to transform 4G card into 5G agreed by Nagy [R1R29750]
 var ext29750NewAppletsPeople = [][]string{
+	{"Aala, Genesis", "Aala Genesis"},
 	{"Abao,Michael Carlo", "Abao Michael Carlo"},
 	{"Giva,Joana Marie", "Giva Joana Marie"},
 	{"Marquez,Justin", "Marquez Justin"},
@@ -222,6 +226,9 @@ var ext29750NewAppletsPeople = [][]string{
 // Delta with baseline/forecast: MyOSD team contribution [R1R29750]
 var ext29750MyosdTeamPeople = [][]string{
 	{"Navarrete Perez,Hector Luis", "Navarrete Perez Hector Luis"},
+}
+var ext29750VenturusFollowUpPeople2023 = [][]string{
+	{"Faria Sandro (TBC)", "Faria Sandro (TBC)"},
 }
 
 // --- R1R29751 COTA Platform SaaS
@@ -307,7 +314,7 @@ var innovationOtherAppletPeople = [][]string{
 }
 
 // --- R1R30027 TAC Dev
-var tac2023BudgetServerPeople = [][]string{
+var tacBudgetServerPeople2023 = [][]string{
 	{"Gattone,Alain", "Gattone Alain"},
 }
 var tacBudgetAppletPeople = [][]string{
@@ -375,6 +382,7 @@ var cotaManagersIN = []string{
 	"Kanwal,Ishan",            // as previous/future manager of COTA resource
 	"Kumar Srivastava,Neeraj", // as previous/future manager of COTA resource
 	"Sharma,Ajay",             // as previous/future manager of COTA resource
+	"Singh,Ashutosh",          // as previous/future manager of COTA resource
 }
 var cotaManagersUS = []string{
 	"Letolle,Nicolas",
@@ -412,5 +420,5 @@ var cotaManagerCountry pivot.Compute[string] = func(elements []pivot.RawValue) (
 			return "US", nil
 		}
 	}
-	return fmt.Sprintf("??-%s", elements[0]), nil
+	return fmt.Sprintf("??-%s-%s", elements[0], elements[1]), nil
 }

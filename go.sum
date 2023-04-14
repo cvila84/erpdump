@@ -1,4 +1,4 @@
-github.com/cvila84/pivot v1.0.0 h1:a7eiSy0mbzlGnQB2+eQPNH4gsdgYSq629rOHOqdZYHI=
-github.com/cvila84/pivot v1.0.0/go.mod h1:ObFBV1IgnHAwgI7JWBK8thKzOo4WgB8JqvKgARwfn7o=
+github.com/cvila84/pivot v1.0.1 h1:W34kKgYEGCtbN/fzBdtjasAkKdgbgVoK2x/zk0+F/RM=
+github.com/cvila84/pivot v1.0.1/go.mod h1:ObFBV1IgnHAwgI7JWBK8thKzOo4WgB8JqvKgARwfn7o=
 golang.org/x/text v0.6.0 h1:3XmdazWV+ubf7QgHSTWeykHOci5oeekaGJBLkrkaw4k=
 golang.org/x/text v0.6.0/go.mod h1:mrYo+phRRbMaCq/xk9113O4dZlRixOauAjOtrjsXDZ8=
